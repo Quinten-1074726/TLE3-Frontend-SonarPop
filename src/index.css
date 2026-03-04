@@ -6,9 +6,15 @@
     }
 
     body {
-        @apply bg-[#090A0E];
+        @apply bg-[#181919] ;
         font-family: var(--font-mono), serif;
     }
+}
+
+#root {
+  max-width: 430px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 :root {
