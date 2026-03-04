@@ -1,15 +1,10 @@
-import PrimaryButton from "../components/PrimaryButton.jsx";
+import Search from "../components/search";
 
-function Home() {
+export default function Home() {
   return (
-    <>
-      <h1 className="text-4xl font-bold">Home</h1>
-      <p className="mt-4 text-black ">
-        Welkom bij SonarPOP.
-      </p>
-        <PrimaryButton> primary button</PrimaryButton>
-    </>
+    <div className="space-y-6">
+      <h1 className="h1">Home</h1>
+      <Search onSearch={(q) => console.log("search:", q)} />
+    </div>
   );
 }
-
-export default Home;
