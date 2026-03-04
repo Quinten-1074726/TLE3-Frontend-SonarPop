@@ -1,27 +1,35 @@
 @import 'tailwindcss';
 
 @layer base {
-    * {
-        @apply scroll-smooth;
-    }
+  html { @apply scroll-smooth; }
 
-    body {
-        @apply bg-[#181919] ;
-        font-family: var(--font-mono), serif;
-    }
+  body {
+    background: #393939;
+    font-family: var(--font-mono), serif;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+  }
 }
 
 #root {
-  max-width: 430px;
   width: 100%;
-  margin: 0 auto;
+  max-width: 430px;
+
+  background: var(--background);
+
+  min-height: 100vh;
+  border-left: 1px solid rgba(255,255,255,0.06);
+  border-right: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 0 40px rgba(0,0,0,0.35);
 }
 
 :root {
-    --background: #090A0E;
+    --background: #181919;
 
     --text-light: #DEF9F6;
-    --text-dark: #090A0E;
+    --text-dark: #181919;
 
     --btn-primary: #4A87DE;
     --btn-secondary: #185686;
