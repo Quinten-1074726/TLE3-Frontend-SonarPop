@@ -1,1 +1,56 @@
 @import 'tailwindcss';
+
+@layer base {
+    * {
+        @apply scroll-smooth;
+    }
+
+    body {
+        @apply bg-[#090A0E];
+        font-family: var(--font-mono), serif;
+    }
+}
+
+:root {
+    --background: #090A0E;
+
+    --text-light: #DEF9F6;
+    --text-dark: #090A0E;
+
+    --btn-primary: #4A87DE;
+    --btn-secondary: #185686;
+    --btn-tertiary: #0D2132;
+
+    --btn-primary-hover: #F5FFFE;
+    --btn-secondary-hover: #84BAE9;
+    --btn-tertiary-hover: #185686;
+
+    --btn-primary-focus: #84BAE9;
+    --btn-secondary-focus: #185686;
+    --btn-tertiary-focus: #0D2132;
+
+    --btn-disabled: #0D2132;
+}
+
+@theme {
+    --color-background: var(--background);
+
+    --color-text-primary: var(--text-light);
+    --color-text-inverse: var(--text-dark);
+
+    --color-primary: var(--btn-primary);
+    --color-secondary: var(--btn-secondary);
+    --color-tertiary: var(--btn-tertiary);
+
+    --color-primary-hover: var(--btn-primary-hover);
+    --color-secondary-hover: var(--btn-secondary-hover);
+    --color-tertiary-hover: var(--btn-tertiary-hover);
+
+    --color-primary-focus: var(--btn-primary-focus);
+    --color-secondary-focus: var(--btn-secondary-focus);
+    --color-tertiary-focus: var(--btn-tertiary-focus);
+
+    --color-disabled: var(--btn-disabled);
+
+    --font-mono: "IBM Plex Mono", monospace;
+}
