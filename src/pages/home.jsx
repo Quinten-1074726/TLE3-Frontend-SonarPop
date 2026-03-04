@@ -1,12 +1,12 @@
-function Home() {
+import Search from "../components/Search.jsx";
+
+export default function Home() {
+  const handleSearch = (q) => console.log("Searching:", q);
+
   return (
-    <>
-      <h1 className="text-4xl font-bold">Home</h1>
-      <p className="mt-4 ">
-        Welkom bij SonarPOP.
-      </p>
-    </>
+    <div className="space-y-6">
+      <h1 className="h1">Home</h1>
+      <Search onSearch={handleSearch} />
+    </div>
   );
 }
-
-export default Home;
