@@ -29,6 +29,7 @@ function App() {
           <img src={Sjoerd} alt="Sjoerd" className="w-20 h-48 rounded-full object-cover" />
           <img src={Sjoerd} alt="Sjoerd" className="w-20 h-48 rounded-full object-cover" />
           <img src={Sjoerd} alt="Sjoerd" className="w-20 h-48 rounded-full object-cover" />
+          
         </div>
         <div className="text-sm text-gray-500 mt-4">Wees als Sjoerd, een blij persoon!</div>
       </h1>
