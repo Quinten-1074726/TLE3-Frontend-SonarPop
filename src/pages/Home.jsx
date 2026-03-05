@@ -26,21 +26,23 @@ export default function Home() {
                 </div>
             )}
 
-            {showConfig && (
-                <div
-                    className={`fixed bottom-16 left-1/2 -translate-x-1/2 w-11/12 max-w-107.5 p-6 z-50 
-                              transition-all duration-300 ease-in-out 
-                              ${showConfig ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5 pointer-events-none"}`}>
-                    <button
-                        onClick={toggleConfig}
-                        className="absolute top-8 right-8 text-2xl text-text-primary transition-transform duration-200 hover:scale-110"
-                    >
-                        <MdClose />
-                    </button>
+            <div
+                className={`fixed bottom-16 left-1/2 -translate-x-1/2 w-11/12 max-w-107.5 p-6 z-50
+                            transform transition-all duration-300 ease-out
+                            ${showConfig
+                            ? "opacity-100 translate-y-0 scale-100"
+                            : "opacity-0 translate-y-10 scale-95 pointer-events-none"
+                }`}
+            >
+                <button
+                    onClick={toggleConfig}
+                    className="absolute top-8 right-8 text-2xl text-text-primary transition-transform duration-200 hover:rotate-90"
+                >
+                    <MdClose />
+                </button>
 
-                    <Slider value={sliderValue} onChange={setSliderValue} />
-                </div>
-            )}
+                <Slider value={sliderValue} onChange={setSliderValue} />
+            </div>
         </>
     );
 }
