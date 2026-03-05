@@ -5,20 +5,29 @@ import Home from "./pages/Home.jsx";
 import Statistics from "./pages/Statistics.jsx";
 import Library from "./pages/Library.jsx";
 import Error from "./pages/Error.jsx";
+import MusicPlayer from "./pages/MusicPlayer.jsx";
 
 const router = createBrowserRouter([
   {
     element: <Layout />,
     errorElement: <Error />,
     children: [
-      { path: "/", 
-        element: <Home /> },
-
-      { path: "/statistics", 
-        element: <Statistics /> },
-        
-      { path: "/library", 
-        element: <Library /> },
+      {
+        path: "/",
+        element: <Home />,
+      },
+      {
+        path: "/statistics",
+        element: <Statistics />,
+      },
+      {
+        path: "/library",
+        element: <Library />,
+      },
+        {
+            path: "/song",
+            element: <MusicPlayer />,
+        },
     ],
   },
 ]);
