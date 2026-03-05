@@ -1,6 +1,6 @@
-import {createBrowserRouter, RouterProvider} from "react-router";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import Layout from "./components/Layout.jsx";
+import Layout from "./components/ui/Layout.jsx";
 import Home from "./pages/Home.jsx";
 import Statistics from "./pages/Statistics.jsx";
 import Library from "./pages/Library.jsx";
@@ -32,8 +32,6 @@ const router = createBrowserRouter([
   },
 ]);
 
-function App() {
-    return <RouterProvider router={router} />;
+export default function App() {
+  return <RouterProvider router={router} />;
 }
-
-export default App;

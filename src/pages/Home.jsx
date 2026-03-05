@@ -1,15 +1,21 @@
-import PrimaryButton from "../components/PrimaryButton.jsx";
+import Search from "../components/search.jsx";
+import { useNav } from "../components/ui/NavContext.jsx";
 
-function Home() {
+export default function Home() {
+  const { isSearchOpen } = useNav();
+
   return (
-    <>
-      <h1 className="text-4xl font-bold">Home</h1>
-      <p className="mt-4 text-black ">
-        Welkom bij SonarPOP.
-      </p>
-        <PrimaryButton> primary button</PrimaryButton>
-    </>
+    <div className="p-6 space-y-6">
+      <h1 className="h2">Home</h1>
+
+      {isSearchOpen ? (
+        <Search onSearch={(q) => console.log("search:", q)} />
+      ) : (
+        <div className="bg-secondary rounded-xl px-5 py-4 text-text-primary">
+          Liked songs (placeholder)
+        </div>
+        // <LikedSongsCard />
+      )}
+    </div>
   );
 }
-
-export default Home;
