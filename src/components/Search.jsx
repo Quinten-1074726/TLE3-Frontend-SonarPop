@@ -54,7 +54,7 @@ function Search({ onSearch, placeholder = "Search..." }) {
         onSubmit={handleSubmit}
         className="
           flex items-center w-full
-          rounded-lg px-6 py-4
+          rounded-xl px-5 py-4
           border border-white/15
           bg-white/5 backdrop-blur-sm
           transition

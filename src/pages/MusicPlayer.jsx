@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Play, Pause, SkipBack, SkipForward, Heart, Menu, Search, Info, ArrowLeft } from "lucide-react";
 
 import {Link} from "react-router";
+import PageHeader from "../components/ui/PageHeader.jsx";
 
 
 export default function MusicPlayer() {
@@ -81,6 +82,7 @@ export default function MusicPlayer() {
 
 
     return (
+        
         <div className="min-h-screen bg-[#181919] flex items-center justify-center font-sans p-4">
 
             {/* Navigatie Iconen */}
