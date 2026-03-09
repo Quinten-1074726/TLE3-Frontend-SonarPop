@@ -10,7 +10,7 @@ function Slider({ value, onChange }) {
                     step="20"
                     value={value}
                     onChange={(e) => onChange(Number(e.target.value))}
-                    className="w-full h-2 rounded-lg"
+                    className="w-full h-2 rounded-lg bg-background accent-background"
                 />
                 <div className="flex justify-between">
                     <p className="text-xs text-text-primary">Personalized</p>

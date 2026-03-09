@@ -1,5 +1,6 @@
 import { useState } from "react";
 import TopModal from "../components/toplist/TopModal";
+import PageHeader from "../components/ui/PageHeader.jsx";
 
 const MOCK = {
   artist: [
@@ -27,9 +28,8 @@ export default function Statistics() {
   const items = openType ? MOCK[openType] : [];
 
   return (
-    <div className="p-6 space-y-4">
-      <h1 className="h2">Statistics</h1>
-
+    <>
+      <PageHeader title="Statistics" />
       <div className="flex flex-wrap gap-3">
         <button className="btn-primary" onClick={() => setOpenType("artist")}>
           Top Artists
@@ -53,6 +53,6 @@ export default function Statistics() {
           onSelectItem={(item) => console.log("Clicked item:", item)}
         />
       )}
-    </div>
+    </>
   );
 }
