@@ -1,10 +1,11 @@
 import CardsCarousel from "../components/CardsCarousel.jsx";
 
-const cards = [1,2,3,4,5]; //Hoveelheid kaarten straks berekent
+const title = "Ontdek meer van Sjoerd"
+const cards = [1,2,3,4,5]; // Hoeveelheid kaarten straks berekent
 function Library() {
     return(
         <>
-            <CardsCarousel cards={cards}/>
+            <CardsCarousel title={title} cards={cards}/>
         </>
     )
 }

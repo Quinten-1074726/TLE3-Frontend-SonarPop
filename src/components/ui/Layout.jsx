@@ -30,9 +30,9 @@ function Layout() {
             <AiOutlineSearch />
           </button>
 
-          <button type="button" className="cursor-pointer">
+          <Link to="/preferences">
             <MdTune />
-          </button>
+          </Link>
 
           <Link to="/statistics">
             <FaChartBar />
