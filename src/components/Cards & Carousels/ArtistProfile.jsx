@@ -1,4 +1,4 @@
-import defaultProfile from "../assets/default-profile.png";
+import defaultProfile from "../../assets/default-profile.png";
 
 function ArtistProfile({ artist }) {
     return(
@@ -7,7 +7,7 @@ function ArtistProfile({ artist }) {
                 <img
                     src={artist?.avatar || defaultProfile}
                     alt={artist?.name || "Unknown"}
-                    className="w-24 h-24 rounded-full object-cover"
+                    className="w-28 h-28 rounded-full object-cover"
                 />
                 <p className="mt-3 font-semibold text-text-primary text-center text-lg">
                     {artist?.name || "Unknown"}

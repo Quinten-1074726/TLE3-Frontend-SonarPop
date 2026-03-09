@@ -1,4 +1,4 @@
-import ProfileCard from "../components/ProfileCard.jsx";
+import ProfileCard from "./ProfileCard.jsx";
 
 function ProfileCarousel({ title, profiles }) {
     return (

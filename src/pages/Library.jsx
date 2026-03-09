@@ -1,13 +1,13 @@
 import PrimaryButton from "../components/PrimaryButton.jsx";
-import {Link} from "react-router";
 import {useState} from "react";
 import CreatePlaylistComponent from "../components/CreatePlaylistComponent.jsx";
-import ProfileCarousel from "../components/ProfileCarousel.jsx";
-import SongCarousel from "../components/SongCarousel.jsx";
+import ProfileCarousel from "../components/Cards & Carousels/ProfileCarousel.jsx";
+import SongCarousel from "../components/Cards & Carousels/SongCarousel.jsx";
 import PageHeader from "../components/ui/PageHeader.jsx";
-import ArtistCarousel from "../components/ArtistCarousel.jsx";
+import ArtistCarousel from "../components/Cards & Carousels/ArtistCarousel.jsx";
+import AlbumCarousel from "../components/Cards & Carousels/AlbumCarousel.jsx";
 
-const cardsTitle = "Ontdek meer van Sjoerd" // Title die straks als prop kan worden ingeladen
+const cardsTitle = "Omdat je Sjoerd leuk vindt" // Title die straks als prop kan worden ingeladen
 const dummyCards = [
     { name: "Sjoerd", artist: "Sjoerd Sjoerdsma" },
     { name: "Blauwe dag", artist: "Suzan & Freek" },
@@ -28,6 +28,13 @@ const dummyArtists = [
     { name: "Ronnie Flex" },
 ];
 
+const albumTitle = "Zie meer albums" // Title die straks als prop kan worden ingeladen
+const dummyAlbums = [
+    { name: "Geluk", artist: "Guus Meeuwis" },
+    { name: "De nacht is van ons", artist: "Antoon" },
+    { name: "Gedeeld door ons", artist: "Suzan $ Freek" },
+];
+
 function Library() {
     const [showModal, setShowModal] = useState(false);
     const openModal = () => setShowModal(true)
@@ -43,6 +50,7 @@ function Library() {
             <SongCarousel title={cardsTitle} cards={dummyCards}/>
             <ProfileCarousel title ={profileTitle} profiles={dummyProfiles}/>
             <ArtistCarousel title={artistTitle} artists={dummyArtists} />
+            <AlbumCarousel title={albumTitle} albums={dummyAlbums} />
         </>
     )
 }
