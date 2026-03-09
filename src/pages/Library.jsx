@@ -1,6 +1,5 @@
 import ProfileCarousel from "../components/ProfileCarousel.jsx";
 import SongCarousel from "../components/SongCarousel.jsx";
-import CardsCarousel from "../components/CardsCarousel.jsx";
 import PageHeader from "../components/ui/PageHeader.jsx";
 
 const cardsTitle = "Ontdek meer van Sjoerd" // Title die straks als prop kan worden ingeladen
@@ -20,10 +19,10 @@ const dummyProfiles = [
 function Library() {
     return(
         <>
+            <PageHeader title="Library" />
             <SongCarousel title={cardsTitle} cards={dummyCards}/>
             <ProfileCarousel title ={profileTitle} profiles={dummyProfiles}/>
-            <PageHeader title="Library" />
-            <CardsCarousel title={title} cards={cards}/>
+            
         </>
     )
 }
