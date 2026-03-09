@@ -9,6 +9,7 @@ import MusicPlayer from "./pages/MusicPlayer.jsx";
 import Preferences from "./pages/Preferences.jsx";
 import CreatePlaylistComponent from "./components/CreatePlaylistComponent.jsx";
 
+import Dashboard from "./pages/dashboard/Dashboard.jsx";
 const router = createBrowserRouter([
   {
     element: <Layout />,
@@ -36,6 +37,11 @@ const router = createBrowserRouter([
 
         { path: "/createPlaylist",
             element: <CreatePlaylistComponent /> },
+
+      {
+        path: "/dashboard",
+        element: <Dashboard />,
+      },
     ],
   },
 ]);
