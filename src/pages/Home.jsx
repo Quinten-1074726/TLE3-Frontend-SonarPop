@@ -5,6 +5,8 @@ import Slider from "../components/Slider.jsx";
 import { MdClose, MdEdit } from "react-icons/md";
 import { useNav } from "../components/ui/NavContext.jsx";
 import PageHeader from "../components/ui/PageHeader.jsx";
+import SongCarousel from "../components/Cards & Carousels/SongCarousel.jsx";
+import GenreCarousel from "../components/Cards & Carousels/GenreCarousel.jsx";
 
 export default function Home() {
   const { isSearchOpen } = useNav();
@@ -12,6 +14,18 @@ export default function Home() {
   const [sliderValue, setSliderValue] = useState(0);
 
   const toggleConfig = () => setShowConfig((prev) => !prev);
+
+  //Dummy data want back-end is traag
+  const dummyCards = [
+    { name: "Sjoerd", artist: "Sjoerd Sjoerdsma" },
+    { name: "Blauwe dag", artist: "Suzan & Freek" },
+    { name: "Brabant", artist: "Guus Meeuwis" },
+  ]
+  const dummyGenres = [
+    { name: "Hiphop" },
+    { name: "Rock"},
+    { name: "Nederpop" },
+  ]
 
   return (
     <div className="space-y-6">
@@ -53,6 +67,9 @@ export default function Home() {
           <Slider value={sliderValue} onChange={setSliderValue} />
         </div>
       </div>
+
+      <SongCarousel title="Recently Played" cards={dummyCards} />
+      <GenreCarousel title="You might like" genres={dummyGenres} />
     </div>
   );
 }
