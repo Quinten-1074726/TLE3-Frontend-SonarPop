@@ -10,14 +10,14 @@ const dummyCards = [
     { name: "Brabant", artist: "Guus Meeuwis" },
 ]
 
-const profileTitle = "Profiles" // Title die straks als prop kan worden ingeladen
+const profileTitle = "Bekijk je vrienden" // Title die straks als prop kan worden ingeladen
 const dummyProfiles = [
     { name: "Jan" },
     { name: "Piet" },
     { name: "Klaas" },
 ];
 
-const artistTitle = "Artists" // Title die straks als prop kan worden ingeladen
+const artistTitle = "Ontdek meer artiesten" // Title die straks als prop kan worden ingeladen
 const dummyArtists = [
     { name: "Sabrina Carpenter" },
     { name: "Suzan & Freek" },
