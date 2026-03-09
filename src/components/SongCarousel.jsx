@@ -1,6 +1,7 @@
-import MusicCard from "../components/MusicCard.jsx";
+import SongCard from "./SongCard.jsx";
 
-function MusicCarousel({ title, cards }) {
+//
+function SongCarousel({ title, cards }) {
     return (
         <>
             <p className="p-4 text-text-primary font-bold text-xl">{ title }</p>
@@ -10,7 +11,7 @@ function MusicCarousel({ title, cards }) {
                         key={idx}
                         className="shrink-0 w-[45%] sm:w-[48%] snap-start"
                     >
-                        <MusicCard />
+                        <SongCard card={card}/>
                     </div>
                 ))}
             </div>
@@ -18,4 +19,4 @@ function MusicCarousel({ title, cards }) {
     );
 }
 
-export default MusicCarousel;
+export default SongCarousel;
