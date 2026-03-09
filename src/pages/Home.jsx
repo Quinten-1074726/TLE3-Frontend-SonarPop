@@ -27,11 +27,13 @@ export default function Home() {
         )}
 
         {!showConfig && (
-          <div className="fixed bottom-18 right-4 transition-all duration-300 ease-in-out transform">
-            <PrimaryButton onClick={toggleConfig}>
-              <MdEdit className="text-text-primary text-2xl" />
-            </PrimaryButton>
-          </div>
+            <div className="fixed bottom-30 left-1/2 -translate-x-1/2 w-full max-w-107.5 pointer-events-none">
+                <div className="absolute right-4 pointer-events-auto transition-all duration-300 ease-in-out">
+                    <PrimaryButton onClick={toggleConfig}>
+                        <MdEdit className="text-text-primary text-3xl" />
+                    </PrimaryButton>
+                </div>
+            </div>
         )}
 
         <div
