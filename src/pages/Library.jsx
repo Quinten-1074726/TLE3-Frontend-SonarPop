@@ -1,4 +1,3 @@
-import CardsCarousel from "../components/CardsCarousel.jsx";
 import PrimaryButton from "../components/PrimaryButton.jsx";
 import {Link} from "react-router";
 import {useState} from "react";
@@ -28,7 +27,6 @@ function Library() {
     return(
         <>
             <PageHeader title="Library" />
-            <CardsCarousel cards={cards}/>
 
             <PrimaryButton onClick={openModal}>Create Playlist</PrimaryButton>
             <CreatePlaylistComponent isOpen={showModal} onClose={closeModal}>
