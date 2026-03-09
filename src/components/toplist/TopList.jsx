@@ -1,9 +1,9 @@
 import TopListItem from "./TopListItem";
 
-function TopList({ items, onSelect }) {
+function TopList({ items, onSelect, limit = 5 }) {
   return (
     <div className="space-y-1">
-      {items.map((item, index) => (
+      {items.slice(0, limit).map((item, index) => (
         <TopListItem
           key={item.id ?? `${item.type}-${index}`}
           item={item}
