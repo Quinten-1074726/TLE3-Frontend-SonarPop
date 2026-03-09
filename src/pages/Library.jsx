@@ -1,3 +1,8 @@
+import CardsCarousel from "../components/CardsCarousel.jsx";
+import PrimaryButton from "../components/PrimaryButton.jsx";
+import {Link} from "react-router";
+import {useState} from "react";
+import CreatePlaylistComponent from "../components/CreatePlaylistComponent.jsx";
 import ProfileCarousel from "../components/ProfileCarousel.jsx";
 import SongCarousel from "../components/SongCarousel.jsx";
 import PageHeader from "../components/ui/PageHeader.jsx";
@@ -17,9 +22,18 @@ const dummyProfiles = [
 ];
 
 function Library() {
+    const [showModal, setShowModal] = useState(false);
+    const openModal = () => setShowModal(true)
+    const closeModal = () => setShowModal(false)
     return(
         <>
             <PageHeader title="Library" />
+            <CardsCarousel cards={cards}/>
+
+            <PrimaryButton onClick={openModal}>Create Playlist</PrimaryButton>
+            <CreatePlaylistComponent isOpen={showModal} onClose={closeModal}>
+
+        </CreatePlaylistComponent>
             <SongCarousel title={cardsTitle} cards={dummyCards}/>
             <ProfileCarousel title ={profileTitle} profiles={dummyProfiles}/>
             
