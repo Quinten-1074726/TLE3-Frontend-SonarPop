@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {createBrowserRouter, RouterProvider} from "react-router-dom";
 
 import Layout from "./components/ui/Layout.jsx";
 import Home from "./pages/Home.jsx";
@@ -10,36 +10,40 @@ import Preferences from "./pages/Preferences.jsx";
 import CreatePlaylistComponent from "./components/CreatePlaylistComponent.jsx";
 
 const router = createBrowserRouter([
-  {
-    element: <Layout />,
-    errorElement: <Error />,
-    children: [
-      {
-        path: "/",
-        element: <Home />,
-      },
-      {
-        path: "/statistics",
-        element: <Statistics />,
-      },
-      {
-        path: "/library",
-        element: <Library />,
-      },
-        {
-            path: "/song",
-            element: <MusicPlayer />,
-        },
+    {
+        element: <Layout/>,
+        errorElement: <Error/>,
+        children: [
+            {
+                path: "/",
+                element: <Home/>,
+            },
+            {
+                path: "/statistics",
+                element: <Statistics/>,
+            },
+            {
+                path: "/library",
+                element: <Library/>,
+            },
+            {
+                path: "/song",
+                element: <MusicPlayer/>,
+            },
 
-      { path: "/preferences",
-        element: <Preferences /> },
+            {
+                path: "/preferences",
+                element: <Preferences/>
+            },
 
-        { path: "/createPlaylist",
-            element: <CreatePlaylistComponent /> },
-    ],
-  },
+            {
+                path: "/createPlaylist",
+                element: <CreatePlaylistComponent/>
+            },
+        ],
+    },
 ]);
 
 export default function App() {
-  return <RouterProvider router={router} />;
+    return <RouterProvider router={router}/>;
 }
