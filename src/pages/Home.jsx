@@ -5,6 +5,7 @@ import Slider from "../components/Slider.jsx";
 import { MdClose, MdEdit } from "react-icons/md";
 import { useNav } from "../components/ui/NavContext.jsx";
 import PageHeader from "../components/ui/PageHeader.jsx";
+import MusicPlayer from "../components/MusicPlayer.jsx";
 
 export default function Home() {
   const { isSearchOpen } = useNav();
@@ -27,7 +28,7 @@ export default function Home() {
         )}
 
         {!showConfig && (
-            <div className="fixed bottom-30 left-1/2 -translate-x-1/2 w-full max-w-107.5 pointer-events-none">
+            <div className="fixed bottom-48 left-1/2 -translate-x-1/2 w-full max-w-107.5 pointer-events-none">
                 <div className="absolute right-4 pointer-events-auto transition-all duration-300 ease-in-out">
                     <PrimaryButton onClick={toggleConfig}>
                         <MdEdit className="text-text-primary text-3xl" />
@@ -37,7 +38,7 @@ export default function Home() {
         )}
 
         <div
-          className={`fixed bottom-16 left-1/2 -translate-x-1/2 w-11/12 max-w-107.5 p-6 z-50 transform transition-all duration-300 ease-out ${
+          className={`fixed bottom-35 left-1/2 -translate-x-1/2 w-120 max-w-115 p-6 z-50 transform transition-all duration-300 ease-out ${
             showConfig
               ? "opacity-100 translate-y-0 scale-100"
               : "opacity-0 translate-y-10 scale-95 pointer-events-none"
@@ -51,8 +52,12 @@ export default function Home() {
           </button>
 
           <Slider value={sliderValue} onChange={setSliderValue} />
+
         </div>
       </div>
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-115  p-6 z-50 transform transition-all duration-300 ease-out">
+<MusicPlayer/>
+    </div>
     </div>
   );
 }
