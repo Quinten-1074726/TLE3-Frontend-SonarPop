@@ -1,52 +1,61 @@
 import PrimaryButton from "../components/PrimaryButton.jsx";
 import {Link} from "react-router";
 import {useState} from "react";
-import CreatePlaylistComponent from "../components/CreatePlaylistComponent.jsx";
-import PageHeader from "../components/ui/PageHeader.jsx";
-import ProfileCard from "../components/ProfileCard.jsx";
+import {MdClose, MdEdit, MdDelete, MdKeyboardArrowLeft} from "react-icons/md";
+import {FaPeopleGroup} from "react-icons/fa6";
 import EditPlaylistComponent from "../components/EditPlaylistComponent.jsx";
+import EditCollaboratorComponent from "../components/EditCollaboratorComponent.jsx";
 
 
 //throwaway data
 const playlistTitle = "Playlist1"
 const dummySongs = [
-    { name: "Sjoerd", artist: "Sjoerd Sjoerdsma" },
-    { name: "Blauwe dag", artist: "Suzan & Freek" },
-    { name: "Brabant", artist: "Guus Meeuwis" },
+    {name: "Sjoerd", artist: "Sjoerd Sjoerdsma"},
+    {name: "Blauwe dag", artist: "Suzan & Freek"},
+    {name: "Brabant", artist: "Guus Meeuwis"},
 ]
+
+const user = "Suzanne"
 
 function Playlist() {
     const [showModal, setShowModal] = useState(false);
+    const [showCModal, setShowCModal] = useState(false);
     const openModal = () => setShowModal(true)
     const closeModal = () => setShowModal(false)
-    return(
+    const openCModal = () => setShowCModal(true)
+    const closeCModal = () => setShowCModal(false)
+
+    return (
         <>
             {/*button to go back to the library */}
-            <PrimaryButton >
-                <Link to="/library"/>
-        </PrimaryButton>
+            <div className="p-2">
+            <div className="flex justify-start items-center max-w-1/7 ">
+            <PrimaryButton>
+                <Link to="/library"><MdKeyboardArrowLeft /></Link>
+            </PrimaryButton>
+        </div>
+        </div>
+            <div className="flex flex-row items-center p-2 gap-5">
+                <div className="">
+                    {/*Playlist image */}
+                    <img className="max-h-40 max-w-40" alt="playlist image"
+                         src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&h=500&auto=format&fit=crop"/>
 
-
-            <div className="flex flex-row items-center">
-            <div>
-                {/*Playlist image */}
-                <h1 className="size-6 text-[#DEF9F6] fill-[#DEF9F6]/20">X</h1>
-                <img alt="" src=""/>
-
-            </div>
-            <div className="flex flex-col">
-                <p className="p-4 text-[#DEF9F6] font-bold text-xl">{playlistTitle}</p>
-                <div className="flex flex-row">
-                    {/*icons for buttons */}
-                <PrimaryButton onClick={openModal}>Edit</PrimaryButton>
-                <PrimaryButton onClick={openModal}>Delete</PrimaryButton>
-                <PrimaryButton onClick={openModal}>inv collaborators</PrimaryButton>
-                <EditPlaylistComponent isOpen={showModal} onClose={closeModal}>
-
-                </EditPlaylistComponent>
+                </div>
+                <div className="pl-4flex flex-col">
+                    <p className="text-[#DEF9F6] font-bold text-xl">{playlistTitle}</p>
+                    <p className="text-[#DEF9F6] font-light text-md">{user}</p>
+                    <div className="flex pt-2 flex-row gap-2">
+                        {/*icons for buttons */}
+                        <PrimaryButton onClick={openModal}><MdEdit/></PrimaryButton>
+                        <PrimaryButton ><MdDelete/></PrimaryButton>
+                        <PrimaryButton onClick={openCModal}><FaPeopleGroup/></PrimaryButton>
+                        <EditPlaylistComponent isOpen={showModal} onClose={closeModal}>
+                        </EditPlaylistComponent>
+                        <EditCollaboratorComponent isCOpen={showCModal} onClose={closeCModal}></EditCollaboratorComponent>
+                    </div>
                 </div>
             </div>
-        </div>
 
             <div className=" bg-[#181919] min-h-screen">
                 <div className="max-w-md mx-auto ">
@@ -60,7 +69,8 @@ function Playlist() {
 
                                 <div className="size-10  rounded flex items-center justify-center shrink-0">
                                     {/* Song image */}
-                                    <h1 className="size-6 text-[#DEF9F6] fill-[#DEF9F6]/20">X</h1>
+                                    <img alt="song image"
+                                         src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&h=500&auto=format&fit=crop"/>
                                 </div>
 
                                 <div className="flex flex-col overflow-hidden">
