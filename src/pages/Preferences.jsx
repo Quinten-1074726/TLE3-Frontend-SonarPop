@@ -72,9 +72,9 @@ function Preferences() {
                         <button
                             key={tab.key}
                             onClick={() => setActiveTab(tab.key)}
-                            className={`px-4 py-2 rounded-lg transition ${
+                            className={`px-4 py-2 rounded-lg transition text-text-primary ${
                                 activeTab === tab.key
-                                    ? "bg-primary text-text-primary"
+                                    ? "bg-primary text-text-primary border-2"
                                     : "bg-secondary"
                             }`}>
                             {tab.label}
