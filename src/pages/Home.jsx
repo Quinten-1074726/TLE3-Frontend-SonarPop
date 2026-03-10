@@ -69,12 +69,11 @@ export default function Home() {
 
         </div>
       </div>
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-115  p-6 z-50 transform transition-all duration-300 ease-out">
-<MusicPlayer/>
-    </div>
-
       <SongCarousel title="Recently Played" cards={dummyCards} />
       <GenreCarousel title="You might like" genres={dummyGenres} />
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-115  p-6 z-50 transform transition-all duration-300 ease-out">
+          <MusicPlayer/>
+    </div>
     </div>
   );
 }
