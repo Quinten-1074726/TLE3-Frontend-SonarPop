@@ -8,6 +8,7 @@ import Error from "./pages/Error.jsx";
 import MusicPlayer from "./components/MusicPlayer.jsx";
 import Preferences from "./pages/Preferences.jsx";
 import CreatePlaylistComponent from "./components/CreatePlaylistComponent.jsx";
+import Playlist from "./pages/Playlist.jsx";
 
 const router = createBrowserRouter([
     {
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
             {
                 path: "/createPlaylist",
                 element: <CreatePlaylistComponent/>
+            },
+            {
+                path: "/playlist",
+                element: <Playlist/>
             },
         ],
     },
