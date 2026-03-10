@@ -1,4 +1,4 @@
-import defaultProfile from "../assets/default-profile.png";
+import defaultProfile from "../../assets/default-profile.png";
 
 // Verwacht nu vanuit de back-end een object genaamd profile, dat bestaat uit een username & avatar. Later aanpassen naar hoe we 'm definitief binnen krijgen.
 function ProfileCard({ profile }) {
