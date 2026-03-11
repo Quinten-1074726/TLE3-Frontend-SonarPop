@@ -60,7 +60,7 @@ function Preferences() {
 
     return(
         <>
-            <PageHeader title="Preferences" />
+            <PageHeader title="Your Preferences" />
 
             <section className="mb-12">
                 <PreferenceSlider label="Hiphop" value={hiphop} onChange={setHiphop} />

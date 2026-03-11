@@ -1,64 +1,34 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { FiPlus } from "react-icons/fi";
+import { FiPlus, FiMusic } from "react-icons/fi";
 
 import CreatePlaylistComponent from "../components/CreatePlaylistComponent.jsx";
-import ProfileCarousel from "../components/Cards & Carousels/ProfileCarousel.jsx";
-import SongCarousel from "../components/Cards & Carousels/SongCarousel.jsx";
 import PageHeader from "../components/ui/PageHeader.jsx";
 
-const cardsTitle = "Because you like Dutch pop";
-
-const dummyCards = [
-  {
-    id: "rec-1",
-    name: "Als Het Avond Is",
-    artist: "Suzan & Freek",
-    image: "https://placehold.co/300x300?text=Als+Het+Avond+Is",
-  },
-  {
-    id: "rec-2",
-    name: "Zij Weet Het",
-    artist: "Tino Martin",
-    image: "https://placehold.co/300x300?text=Zij+Weet+Het",
-  },
-  {
-    id: "rec-3",
-    name: "Samen Voor Altijd",
-    artist: "Marco Borsato",
-    image: "https://placehold.co/300x300?text=Samen+Voor+Altijd",
-  },
-  {
-    id: "rec-4",
-    name: "Stiekem",
-    artist: "Maan & Goldband",
-    image: "https://placehold.co/300x300?text=Stiekem",
-  },
-  {
-    id: "rec-5",
-    name: "Lichtje Branden",
-    artist: "Suzan & Freek",
-    image: "https://placehold.co/300x300?text=Lichtje+Branden",
-  },
-];
-
-const profileTitle = "Friends you may know";
-
-const dummyProfiles = [
+const dummyPlaylists = [
     {
-        id: "lib-friend-1",
-        username: "Rob Petten",
-        avatar: "https://placehold.co/200x200?text=Rob",
+        id: "playlist-1",
+        title: "Playlist 1",
+        subtitle: "Your favorite Dutch pop tracks",
+        image: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&h=500&auto=format&fit=crop",
     },
     {
-        id: "lib-friend-2",
-        username: "Barend Drecht",
-        avatar: "https://placehold.co/200x200?text=Barend",
+        id: "playlist-2",
+        title: "Late Night Mix",
+        subtitle: "Chill songs for the evening",
+        image: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=500&h=500&auto=format&fit=crop",
     },
     {
-        id: "lib-friend-3",
-        username: "Mark Putte",
-        avatar: "https://placehold.co/200x200?text=Mark",
+        id: "playlist-3",
+        title: "Roadtrip",
+        subtitle: "Upbeat songs for onderweg",
+        image: "https://images.unsplash.com/photo-1501612780327-45045538702b?q=80&w=500&h=500&auto=format&fit=crop",
+    },
+    {
+        id: "playlist-4",
+        title: "Focus Mode",
+        subtitle: "Music to stay in the zone",
+        image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=500&h=500&auto=format&fit=crop",
     },
 ];
 
@@ -79,7 +49,7 @@ function Library() {
 
     return (
         <div className="min-h-screen bg-background text-text-primary pb-28">
-            <PageHeader title="Library" />
+            <PageHeader title="Your Library" />
 
             <main className="pt-4 flex flex-col gap-8">
                 <div className="px-4">
@@ -96,44 +66,51 @@ function Library() {
                 <CreatePlaylistComponent isOpen={showModal} onClose={closeModal} />
 
                 <section className="px-4">
-                    <p className="text-text-primary font-bold text-xl mb-4">
-                        Your playlist
-                    </p>
+                    <div className="mb-4">
+                        <h2 className="text-text-primary font-bold text-xl">
+                            Your playlists
+                        </h2>
+                        <p className="text-sm text-white/70 mt-1">
+                            All your saved playlists in one place.
+                        </p>
+                    </div>
 
-                    <Link
-                        to="/playlist"
-                        className="block rounded-2xl bg-tertiary border border-white/10 p-4 hover:border-white/20 transition"
-                    >
-                        <div className="flex items-center gap-4">
-                            <img
-                                className="h-24 w-24 rounded-xl object-cover shrink-0"
-                                alt="Playlist cover"
-                                src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&h=500&auto=format&fit=crop"
-                            />
-
-                            <div className="min-w-0">
-                                <h2 className="text-text-primary font-bold text-lg truncate">
-                                    Playlist 1
-                                </h2>
-                                <p className="text-sm text-white/70 mt-1">
-                                    A mix of your saved favorites and recent discoveries.
-                                </p>
-                            </div>
+                    {dummyPlaylists.length === 0 ? (
+                        <div className="rounded-2xl border border-white/10 bg-tertiary p-6 text-center">
+                            <FiMusic className="mx-auto mb-3 text-2xl text-white/70" />
+                            <p className="text-text-primary font-semibold">
+                                No playlists yet
+                            </p>
+                            <p className="text-sm text-white/70 mt-1">
+                                Create your first playlist to get started.
+                            </p>
                         </div>
-                    </Link>
+                    ) : (
+                        <div className="grid grid-cols-2 gap-4">
+                            {dummyPlaylists.map((playlist) => (
+                                <Link
+                                    key={playlist.id}
+                                    to="/playlist"
+                                    className="block rounded-2xl bg-tertiary border border-white/10 p-3 hover:border-white/20 transition focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-background"
+                                >
+                                    <img
+                                        src={playlist.image}
+                                        alt={`${playlist.title} cover`}
+                                        className="w-full aspect-square rounded-xl object-cover mb-3"
+                                    />
+
+                                    <h3 className="text-text-primary font-bold text-base leading-tight truncate">
+                                        {playlist.title}
+                                    </h3>
+
+                                    <p className="text-xs text-white/70 mt-1 leading-snug line-clamp-2">
+                                        {playlist.subtitle}
+                                    </p>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
                 </section>
-
-                <SongCarousel
-                    title={cardsTitle}
-                    cards={dummyCards}
-                    emptyText="No songs found yet."
-                />
-
-                <ProfileCarousel
-                    title={profileTitle}
-                    profiles={dummyProfiles}
-                    emptyText="No profiles found yet."
-                />
             </main>
         </div>
     );
