@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import Search from "../components/Search";
 import PrimaryButton from "../components/PrimaryButton.jsx";
 import Slider from "../components/Slider.jsx";
@@ -8,8 +8,20 @@ import PageHeader from "../components/ui/PageHeader.jsx";
 import MusicPlayer from "../components/MusicPlayer.jsx";
 import SongCarousel from "../components/Cards & Carousels/SongCarousel.jsx";
 import GenreCarousel from "../components/Cards & Carousels/GenreCarousel.jsx";
+import {useNavigate} from "react-router";
 
 export default function Home() {
+  //Check if user is logged in by searching JWT token in localstorage
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+    }
+  }, []);
+
   const { isSearchOpen } = useNav();
   const [showConfig, setShowConfig] = useState(false);
   const [sliderValue, setSliderValue] = useState(0);
