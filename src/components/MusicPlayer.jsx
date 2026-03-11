@@ -1,6 +1,8 @@
 
-import React, { useState, useRef, useEffect, createContext, useContext } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Play, Pause, SkipBack, SkipForward, Heart, Menu, Info, ArrowLeft, ChevronDown } from "lucide-react";
+import {Link} from "react-router";
+import { FaHeart } from "react-icons/fa";
 
 function MusicPlayer() {
     const tracks = [
@@ -21,22 +23,18 @@ function MusicPlayer() {
     ];
 
     const [isExpanded, setIsExpanded] = useState(false);
+    const [showQueue, setShowQueue] = useState(false);
+    const [showHeart, setShowHeart] = useState(false);
+    const [showInfo, setShowInfo] = useState(false)
+
     const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
 
+
     const audioRef = useRef(new Audio(tracks[0].src));
     const currentTrack = tracks[currentTrackIndex];
 
-    const forward = (e) => {
-        e?.stopPropagation();
-        setCurrentTrackIndex((prev) => (prev + 1) % tracks.length);
-    };
-
-    const backward = (e) => {
-        e?.stopPropagation();
-        setCurrentTrackIndex((prev) => (prev - 1 + tracks.length) % tracks.length);
-    };
     const togglePlay = (e) => {
         e?.stopPropagation();
         if (isPlaying) {
@@ -47,131 +45,140 @@ function MusicPlayer() {
         setIsPlaying(!isPlaying);
     };
 
+    const forward = (e) => {
+        e?.stopPropagation();
+        setCurrentTrackIndex((prev) => (prev + 1) % tracks.length);
+    };
+
+    const backward = (e) => {
+        e?.stopPropagation();
+        setCurrentTrackIndex((prev) => (prev - 1 + tracks.length) % tracks.length);
+    };
+
+    const toggleQueue = (e) => {
+        e?.stopPropagation();
+        setShowQueue(!showQueue);
+    };
+
+    const toggleHeart = (e) => {
+        e?.stopPropagation();
+        setShowHeart(!showHeart);
+    };
+
     useEffect(() => {
         const audio = audioRef.current;
         audio.src = tracks[currentTrackIndex].src;
-
-        if (isPlaying) {
-            audio.play().catch(e => console.log("Play failed", e));
-        }
+        if (isPlaying) audio.play().catch(() => {});
 
         const updateProgress = () => {
-            if (audio.duration) {
-                setProgress((audio.currentTime / audio.duration) * 100);
-            }
+            if (audio.duration) setProgress((audio.currentTime / audio.duration) * 100);
         };
 
         audio.addEventListener('timeupdate', updateProgress);
-        audio.addEventListener('ended', forward);
+        return () => audio.removeEventListener('timeupdate', updateProgress);
+    }, [currentTrackIndex, tracks]);
 
-        return () => {
-            audio.removeEventListener('timeupdate', updateProgress);
-            audio.removeEventListener('ended', forward);
-        };
-    }, [currentTrackIndex, isPlaying, tracks]);
-    
     return (
         <div className="fixed inset-0 pointer-events-none flex items-end justify-center p-4 z-[999]">
-            {/* Achtergrond overlay voor focus */}
-            <div
-                className={`absolute inset-0 bg-black/60 w-fit backdrop-blur-sm transition-opacity duration-700 pointer-events-auto ${isExpanded ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-                onClick={() => setIsExpanded(false)}
-            />
 
-            {/* DE SPELER CONTAINER */}
+
             <div
                 onClick={() => !isExpanded && setIsExpanded(true)}
                 className={`
-                    relative w-full  max-w-[430px] bg-[#181919] shadow-2xl overflow-hidden pointer-events-auto
-                    transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]
-                    ${isExpanded
-                    ? 'h-[90vh] rounded-[40px] mb-[2rem]'
-                    : 'h-20 rounded-2xl mb-8 border border-white/10'
-                }
+                    relative w-full max-w-[420px] bg-[#1a1a1a] shadow-2xl overflow-hidden pointer-events-auto
+                    transition-all duration-700 ease-[cubic-bezier(0.2,1,0.2,1)]
+                    ${isExpanded ? 'h-[85vh] rounded-[48px] mb-8' : 'h-20 rounded-2xl mb-8 border border-white/5'}
                 `}
             >
-                <div className={`
-                    absolute top-0 left-0 w-full h-20 flex items-center justify-between px-4 z-20 transition-opacity duration-300
-                    ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}
-                `}>
-                    <div className="flex items-center gap-3 overflow-hidden">
-                        <img src={currentTrack.cover} alt="" className="w-12 h-12 rounded-lg shadow-lg object-cover" />
-                        <div className="truncate">
-                            <div className="text-white text-sm font-bold truncate">{currentTrack.title}</div>
-                            <div className="text-gray-400 text-xs truncate">{currentTrack.author}</div>
-                        </div>
+                {/* Mini player */}
+                <div className={`absolute top-0 left-0 w-full h-20 flex items-center justify-between px-4 z-20 transition-opacity duration-300 ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                    <div className="flex items-center gap-3">
+                        <img src={currentTrack.cover} className="w-12 h-12 rounded-lg object-cover"  alt="Song cover"/>
+                        <div className="text-white text-sm font-bold">{currentTrack.title}</div>
                     </div>
-                    <button onClick={togglePlay} className="bg-white rounded-full p-2.5 text-black">
-                        {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
+                    <button onClick={togglePlay} className="bg-white p-2.5 rounded-full text-black">
+                        {isPlaying ? <Pause size={18} fill="black" /> : <Play size={18} fill="black" />}
                     </button>
-
-                    <div className="absolute bottom-0 left-0 h-[2px] bg-white/10 w-full">
-                        <div className="h-full bg-white transition-all duration-300" style={{ width: `${progress}%` }}></div>
-                    </div>
                 </div>
 
-                <div className={`
-                    flex flex-col h-full  transition-all duration-700
-                    ${isExpanded ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-95 pointer-events-none'}
-                `}>
+                {/* Full player*/}
+                <div className={`flex flex-col h-full transition-all duration-700 ${isExpanded ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
 
-                    <div className="flex justify-between items-center p-6 w-full">
-                        <button onClick={(e) => { e.stopPropagation(); setIsExpanded(false); }} className="text-white">
+                    <div className="flex justify-between items-center p-8 z-30">
+                        <button onClick={(e) => { e.stopPropagation(); setIsExpanded(false); setShowQueue(false); }} className="text-white/60 hover:text-white">
                             <ChevronDown size={28} />
                         </button>
-                        <span className="text-white/40 text-[10px] uppercase tracking-[0.2em] font-bold">Nu aan het spelen</span>
-                        <button className="text-white">
+                        <span className="text-white/80 text-[10px] uppercase tracking-widest font-bold">
+                            {showQueue ? 'Queue' : 'Now playing'}
+                        </span>
+                        <button onClick={toggleQueue} className={`transition-colors ${showQueue ? 'text-[#3767B0]' : 'text-white/60'}`}>
                             <Menu size={24} />
                         </button>
                     </div>
 
-                    <div className="px-8 flex-1 flex flex-col justify-center">
-                        <div className="relative aspect-square w-full shadow-2xl rounded-2xl overflow-hidden mb-8">
-                            <img
-                                src={currentTrack.cover}
-                                alt="Albumhoes"
-                                className={`w-full h-full object-cover transition-transform duration-1000 ${isExpanded ? 'scale-100' : 'scale-110'}`}
-                            />
-                        </div>
+                    {/* Content switcher view and queue*/}
+                    <div className="flex-1 px-8 relative overflow-hidden">
 
-                        <div className="flex justify-between items-end mb-8">
-                            <div className="flex-1">
-                                <div className="text-[0.75rem] font-bold text-teal-400 mb-2 uppercase tracking-widest">{currentTrack.album}</div>
+                        {/* Song view */}
+                        <div className={`absolute inset-0 px-8 transition-all duration-700 ease-in-out ${showQueue ? 'opacity-0 scale-90 -translate-x-full pointer-events-none' : 'opacity-100 scale-100 translate-x-0'}`}>
+                            <div className="aspect-square w-full rounded-3xl overflow-hidden shadow-2xl mb-8">
+                                <img alt="Song cover" src={currentTrack.cover} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="mb-8">
                                 <h2 className="text-2xl font-bold text-white mb-1">{currentTrack.title}</h2>
-                                <p className="text-lg text-gray-400">{currentTrack.author}</p>
-                            </div>
-                            <div className="flex gap-4 mb-2">
-                                <Heart className="text-white opacity-40 hover:opacity-100 transition-opacity" />
-                                <Info className="text-white opacity-40 hover:opacity-100 transition-opacity" />
+                                <p className="text-lg text-white/50">{currentTrack.author}</p>
                             </div>
                         </div>
 
-                        <div className="w-full space-y-3 mb-10">
-                            <div className="relative h-1.5 bg-white/10 rounded-full w-full group cursor-pointer">
-                                <div className="absolute h-full bg-white rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
-                                <div className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-xl opacity-0 group-hover:opacity-100 transition-opacity" style={{ left: `calc(${progress}% - 8px)` }} />
-                            </div>
-                            <div className="flex justify-between text-[11px] font-bold text-gray-500">
-                                <span>1:42</span>
-                                <span>3:12</span>
+                        {/* Queue if state is true*/}
+                        <div className={`absolute inset-0 px-8 transition-all duration-700 ease-in-out ${showQueue ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'}`}>
+                            <div className="space-y-4 pt-2 h-[60%] overflow-y-auto custom-scrollbar">
+                                {tracks.map((track, idx) => (
+                                    <div
+                                        key={idx}
+                                        onClick={() => setCurrentTrackIndex(idx)}
+                                        className={`flex items-center gap-4 p-3 rounded-2xl transition-colors ${currentTrackIndex === idx ? 'bg-[#3767B0]/30' : 'hover:bg-white/5'}`}
+                                    >
+                                        <div className="relative size-12 shrink-0">
+                                            <img src={track.cover} className="rounded-lg object-cover size-full"  alt="song cover"/>
+                                            {currentTrackIndex === idx && isPlaying && (
+                                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-lg">
+                                                    <div className="w-1 h-3 bg-[#DEF9F6] animate-pulse mx-0.5" />
+                                                    <div className="w-1 h-5 bg-[#DEF9F6] animate-pulse mx-0.5" />
+                                                    <div className="w-1 h-3 bg-[#DEF9F6] animate-pulse mx-0.5" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 overflow-hidden">
+                                            <div className={`text-sm font-bold truncate ${currentTrackIndex === idx ? 'text-[#84BAE9]' : 'text-white'}`}>{track.title}</div>
+                                            <div className="text-xs text-[#DEF9F6]/70 truncate">{track.author}</div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
+                    </div>
 
-                        <div className="flex items-center justify-center gap-10 pb-12">
-                            <button onClick={backward} className="text-white/60 hover:text-white transition-colors">
-                                <SkipBack size={32} fill="currentColor" />
+                    <div className="p-8 pt-0 z-30">
+                        <div className="mb-8">
+                            <div className="h-1 w-full bg-white/10 rounded-full mb-2">
+                                <div className="h-full bg-white rounded-full relative" style={{ width: `${progress}%` }}>
+                                    <div className="absolute right-0 top-1/2 -translate-y-1/2 size-3 bg-white rounded-full shadow-lg" />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <button onClick={toggleHeart} className={`cursor-pointer transition-colors delay-50 duration-400 ease-in-out hover:-translate-y-0.4 hover:scale-110  ${showHeart ? 'text-[#3767B0]' : 'text-white/40'}`}>
+                                <FaHeart size={24} />
                             </button>
-
-                            <button
-                                onClick={togglePlay}
-                                className="w-20 h-20 flex items-center justify-center rounded-full bg-white shadow-[0_0_30px_rgba(255,255,255,0.2)] text-black hover:scale-105 active:scale-95 transition-transform"
-                            >
-                                {isPlaying ? <Pause size={36} fill="currentColor" /> : <Play size={36} fill="currentColor" className="ml-1" />}
-                            </button>
-
-                            <button onClick={forward} className="text-white/60 hover:text-white transition-colors">
-                                <SkipForward size={32} fill="currentColor" />
-                            </button>
+                            <div className="flex items-center gap-8">
+                                <button onClick={backward} className="text-white"><SkipBack size={28} fill="currentColor" /></button>
+                                <button onClick={togglePlay} className="size-16 bg-white rounded-full flex items-center justify-center text-black">
+                                    {isPlaying ? <Pause size={30} fill="black" /> : <Play size={30} fill="black" className="ml-1" />}
+                                </button>
+                                <button onClick={forward} className="text-white"><SkipForward size={28} fill="currentColor" /></button>
+                            </div>
+                            <button className="text-white/40"><Info size={24} /></button>
                         </div>
                     </div>
                 </div>

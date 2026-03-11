@@ -12,6 +12,7 @@ import Register from "./pages/Register.jsx";
 
 import Dashboard from "./pages/dashboard/Dashboard.jsx";
 import Playlist from "./pages/Playlist.jsx";
+import Waitlist from "./pages/Waitlist.jsx";
 const router = createBrowserRouter([
     {
         path: "/login",
@@ -53,6 +54,10 @@ const router = createBrowserRouter([
             {
                 path: "/playlist",
                 element: <Playlist/>
+            },
+            {
+                path: "/waitlist",
+                element: <Waitlist/>
             },
         ],
     },

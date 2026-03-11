@@ -4,6 +4,7 @@ import CreatePlaylistComponent from "../components/CreatePlaylistComponent.jsx";
 import ProfileCarousel from "../components/Cards & Carousels/ProfileCarousel.jsx";
 import SongCarousel from "../components/Cards & Carousels/SongCarousel.jsx";
 import PageHeader from "../components/ui/PageHeader.jsx";
+import {Link} from "react-router";
 import ArtistCarousel from "../components/Cards & Carousels/ArtistCarousel.jsx";
 import AlbumCarousel from "../components/Cards & Carousels/AlbumCarousel.jsx";
 import {useNavigate} from "react-router";
@@ -22,19 +23,19 @@ const dummyProfiles = [
     {name: "Klaas"},
 ];
 
-const artistTitle = "Ontdek meer artiesten" // Title die straks als prop kan worden ingeladen
-const dummyArtists = [
-    { name: "Sabrina Carpenter" },
-    { name: "Suzan & Freek" },
-    { name: "Ronnie Flex" },
-];
-
-const albumTitle = "Zie meer albums" // Title die straks als prop kan worden ingeladen
-const dummyAlbums = [
-    { name: "Geluk", artist: "Guus Meeuwis" },
-    { name: "De nacht is van ons", artist: "Antoon" },
-    { name: "Gedeeld door ons", artist: "Suzan $ Freek" },
-];
+// const artistTitle = "Ontdek meer artiesten" // Title die straks als prop kan worden ingeladen
+// const dummyArtists = [
+//     { name: "Sabrina Carpenter" },
+//     { name: "Suzan & Freek" },
+//     { name: "Ronnie Flex" },
+// ];
+//
+// const albumTitle = "Zie meer albums" // Title die straks als prop kan worden ingeladen
+// const dummyAlbums = [
+//     { name: "Geluk", artist: "Guus Meeuwis" },
+//     { name: "De nacht is van ons", artist: "Antoon" },
+//     { name: "Gedeeld door ons", artist: "Suzan $ Freek" },
+// ];
 
 function Library() {
     //Check if user is logged in by searching JWT token in localstorage
