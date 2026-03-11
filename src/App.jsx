@@ -11,6 +11,7 @@ import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 
 import Dashboard from "./pages/dashboard/Dashboard.jsx";
+import Playlist from "./pages/Playlist.jsx";
 const router = createBrowserRouter([
     {
         path: "/login",
