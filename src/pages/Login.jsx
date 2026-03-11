@@ -9,6 +9,7 @@ function Login() {
     const navigate = useNavigate();
 
     const BASE_URL = import.meta.env.VITE_BASE_URL;
+    const API_KEY = import.meta.env.API_KEY;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -19,6 +20,7 @@ function Login() {
             const response = await fetch(`${BASE_URL}/auth/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
+                "X-API-Key": API_KEY,
                 body: JSON.stringify({ username, password }),
             });
 
@@ -30,6 +32,7 @@ function Login() {
                 return;
             }
 
+            localStorage.setItem("token", data.token);
             navigate("/");
         } catch (err) {
             setError("Can't connect to server");

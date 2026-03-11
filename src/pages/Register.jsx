@@ -10,6 +10,7 @@ function Register() {
 
     const navigate = useNavigate();
     const BASE_URL = import.meta.env.VITE_BASE_URL;
+    const API_KEY = import.meta.env.API_KEY;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -22,6 +23,7 @@ function Register() {
                 headers: {
                     "Content-Type": "application/json",
                 },
+                "X-API-Key": API_KEY,
                 body: JSON.stringify({
                     username,
                     email,
