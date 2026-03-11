@@ -2,6 +2,8 @@ import { useState } from "react";
 import TopModal from "../components/toplist/TopModal";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import { STATISTICS_MOCK } from "../mocks/statisticsMock.js";
+import PrimaryButton from "../components/PrimaryButton.jsx";
+import notFound from "../assets/Image-not-found.png";
 
 export default function Statistics() {
   const [openType, setOpenType] = useState(null);
@@ -12,22 +14,38 @@ export default function Statistics() {
     <>
       <PageHeader title="Statistics" />
 
-      <div className="flex flex-wrap gap-3">
-        <button className="btn-primary" onClick={() => setOpenType("artist")}>
-          Top Artists
-        </button>
+      <div className="grid grid-cols-2 gap-12 mx-6">
+        <div className="">
+          <p className="text-text-primary py-2 text-xl">Top Artist</p>
+          <img src={notFound} alt="Top Artist" className="rounded-xl my-4" />
+          <PrimaryButton onClick={() => setOpenType("artist")}>
+            Top Artists
+          </PrimaryButton>
+        </div>
 
-        <button className="btn-secondary" onClick={() => setOpenType("album")}>
-          Top Albums
-        </button>
+        <div className="">
+          <p className="text-text-primary py-2 text-xl">Top Genre</p>
+          <img src={notFound} alt="Top Artist" className="rounded-xl my-4" />
+          <PrimaryButton onClick={() => setOpenType("genre")}>
+            Top Genres
+          </PrimaryButton>
+        </div>
 
-        <button className="btn-tertiary" onClick={() => setOpenType("song")}>
-          Top Songs
-        </button>
+        <div className="">
+          <p className="text-text-primary py-2 text-xl">Top Album</p>
+          <img src={notFound} alt="Top Artist" className="rounded-xl my-4" />
+          <PrimaryButton onClick={() => setOpenType("album")}>
+            Top Albums
+          </PrimaryButton>
+        </div>
 
-        <button className="btn-secondary" onClick={() => setOpenType("genre")}>
-          Top Genres
-        </button>
+        <div className="">
+          <p className="text-text-primary py-2 text-xl">Top Song</p>
+          <img src={notFound} alt="Top Artist" className="rounded-xl my-4" />
+          <PrimaryButton onClick={() => setOpenType("song")}>
+            Top Songs
+          </PrimaryButton>
+        </div>
       </div>
 
       {openType && (
