@@ -3,24 +3,26 @@ import SongCard from "./SongCard.jsx";
 function SongCarousel({ title, cards = [] }) {
     return (
         <section className="w-full">
-            <p className="px-8 text-text-primary font-bold text-2xl mb-3">
+            <p className="px-4 text-text-primary font-bold text-xl mb-3">
                 {title}
             </p>
 
-            <div className="overflow-x-auto flex gap-4 px-8 snap-x snap-mandatory scrollbar-none">
-                {cards.length === 0 ? (
-                    <p className="text-sm text-white/60">Nog geen favoriete nummers gevonden.</p>
-                ) : (
-                    cards.map((card, idx) => (
+            {cards.length === 0 ? (
+                <p className="px-4 text-sm text-white/60">
+                    Nog geen favoriete nummers gevonden.
+                </p>
+            ) : (
+                <div className="overflow-x-auto whitespace-nowrap pl-4 pr-2 scrollbar-none">
+                    {cards.map((card, idx) => (
                         <div
                             key={card?.id || idx}
-                            className="shrink-0 snap-start"
+                            className="inline-block align-top mr-4"
                         >
                             <SongCard card={card} />
                         </div>
-                    ))
-                )}
-            </div>
+                    ))}
+                </div>
+            )}
         </section>
     );
 }

@@ -10,7 +10,7 @@ function SongCard({ card }) {
             <img
                 src={image}
                 alt={songName}
-                className="w-32 h-32 object-cover rounded-lg mb-3"
+                className="w-32 h-32 object-cover rounded-lg mb-2"
             />
             <p className="text-sm font-bold text-text-primary leading-tight truncate">
                 {songName}

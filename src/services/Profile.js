@@ -1,54 +1,30 @@
-import { apiGet } from "./api.js";
-
-function normalizeSong(track) {
-  return {
-    id: track.id ?? track.trackId ?? crypto.randomUUID(),
-    title: track.title ?? track.name ?? "Unknown track",
-    artist: track.artist ?? track.artistName ?? "Unknown artist",
-    image:
-      track.image ||
-      track.cover ||
-      track.albumCover ||
-      track.artwork ||
-      "https://placehold.co/300x300?text=Song",
-  };
+function normalizeFriend(friend) {
+    return {
+        id: friend?.id ?? friend?.userId ?? crypto.randomUUID(),
+        username: friend?.username ?? friend?.name ?? "Unknown",
+        avatar: friend?.avatar ?? friend?.image ?? null,
+    };
 }
 
-function normalizeFriend(profile) {
-  return {
-    id: profile.id ?? profile.userId ?? crypto.randomUUID(),
-    name: profile.name ?? profile.username ?? "Unknown user",
-    avatar:
-      profile.avatar ||
-      profile.profileImage ||
-      profile.image ||
-      "https://placehold.co/200x200?text=User",
-  };
+async function getFavoriteTracks() {
+    // Nog geen geschikt endpoint voor favorites op de profilepagina.
+    // Later hier koppelen zodra backend een juiste route heeft.
+    return [];
 }
 
-export async function getProfilePageData(userId, token) {
-  const [feedback, blacklist] = await Promise.allSettled([
-    apiGet(`/feedback/${userId}`, token),
-    apiGet(`/blacklist/${userId}`, token),
-  ]);
+async function getFriends() {
+    // Nog geen duidelijk friends-endpoint aanwezig.
+    return [];
+}
 
-  const favoriteTracks =
-    feedback.status === "fulfilled"
-      ? Array.isArray(feedback.value)
-        ? feedback.value
-            .filter((item) => item.liked === true || item.type === "like")
-            .slice(0, 10)
-            .map((item) => normalizeSong(item.track ?? item))
-        : []
-      : [];
+export async function getProfilePageData() {
+    const [favoriteTracks, friends] = await Promise.all([
+        getFavoriteTracks(),
+        getFriends(),
+    ]);
 
-  const blockedItems =
-    blacklist.status === "fulfilled" && Array.isArray(blacklist.value)
-      ? blacklist.value
-      : [];
-
-  return {
-    favoriteTracks,
-    blockedItems,
-  };
+    return {
+        favoriteTracks,
+        friends: friends.map(normalizeFriend),
+    };
 }
