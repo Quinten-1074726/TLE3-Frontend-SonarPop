@@ -88,11 +88,11 @@ function Library() {
                     ) : (
                         <div className="grid grid-cols-2 gap-4">
                             {dummyPlaylists.map((playlist) => (
-                                <Link
-                                    key={playlist.id}
-                                    to="/playlist"
-                                    className="block rounded-2xl bg-tertiary border border-white/10 p-3 hover:border-white/20 transition focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-background"
-                                >
+                                    <Link
+                                        key={playlist.id}
+                                        to="/playlist"
+                                        className="block rounded-2xl p-1 transition hover:opacity-90 focus:outline-none"
+                                    >
                                     <img
                                         src={playlist.image}
                                         alt={`${playlist.title} cover`}

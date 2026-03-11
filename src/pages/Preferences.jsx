@@ -22,9 +22,9 @@ function Preferences() {
 
     // DUMMY DATA
     const dummyLists = {
-        genres: ["Rock", "Pop"], //Verwacht blacklisted genres in array
-        artists: ["Artist A", "Artist B"], //Verwacht blacklisted artists in array
-        songs: ["Song 1", "Song 2"] //Verwacht blacklisted songs in array
+        genres: ["Hardcore", "Techno"], //Verwacht blacklisted genres in array
+        artists: ["Sabrina Carpenter", "Ed Sheeran"], //Verwacht blacklisted artists in array
+        songs: ["Dance Monkey", "Despacito"] //Verwacht blacklisted songs in array
     };
     const tabs = [
         { key: "genres", label: "Genres" },
