@@ -7,10 +7,19 @@ import Library from "./pages/Library.jsx";
 import Error from "./pages/Error.jsx";
 import Preferences from "./pages/Preferences.jsx";
 import CreatePlaylistComponent from "./components/CreatePlaylistComponent.jsx";
-import Playlist from "./pages/Playlist.jsx";
+import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
 
 import Dashboard from "./pages/dashboard/Dashboard.jsx";
 const router = createBrowserRouter([
+    {
+        path: "/login",
+        element: <Login/>,
+    },
+    {
+        path: "/register",
+        element: <Register/>,
+    },
     {
         element: <Layout/>,
         errorElement: <Error/>,
@@ -40,10 +49,6 @@ const router = createBrowserRouter([
                 path: "/dashboard",
                 element: <Dashboard />,
               },
-            {
-                path: "/createPlaylist",
-                element: <CreatePlaylistComponent />
-            },
             {
                 path: "/playlist",
                 element: <Playlist/>

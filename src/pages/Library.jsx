@@ -1,11 +1,12 @@
 import PrimaryButton from "../components/PrimaryButton.jsx";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import CreatePlaylistComponent from "../components/CreatePlaylistComponent.jsx";
 import ProfileCarousel from "../components/Cards & Carousels/ProfileCarousel.jsx";
 import SongCarousel from "../components/Cards & Carousels/SongCarousel.jsx";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import ArtistCarousel from "../components/Cards & Carousels/ArtistCarousel.jsx";
 import AlbumCarousel from "../components/Cards & Carousels/AlbumCarousel.jsx";
+import {useNavigate} from "react-router";
 
 const cardsTitle = "Omdat je Sjoerd leuk vindt" // Title die straks als prop kan worden ingeladen
 const dummyCards = [
@@ -36,6 +37,17 @@ const dummyAlbums = [
 ];
 
 function Library() {
+    //Check if user is logged in by searching JWT token in localstorage
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            navigate("/login");
+        }
+    }, []);
+
     const [showModal, setShowModal] = useState(false);
     const openModal = () => setShowModal(true)
     const closeModal = () => setShowModal(false)
