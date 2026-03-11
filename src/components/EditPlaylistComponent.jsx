@@ -92,96 +92,112 @@ function EditPlaylistComponent({isOpen, onClose}) {
     if (!isOpen) return null
     return (
 
-        <div
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 ">
-            <div className="bg-[#0D2132] rounded-2xl">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 sm:p-6">
+            <div className="relative w-full max-w-xl max-h-[90vh] bg-[#0D2132] rounded-3xl shadow-2xl overflow-hidden flex flex-col">
 
-
-                <div className="p-2 flex justify-end">
-                    {/* Close modal button */}
-                    <SecondaryButton
+                {/* Close Button */}
+                <div className="flex justify-end p-4 absolute right-0 top-0 z-20">
+                    <button
                         onClick={onClose}
-                        className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 z-20"
+                        className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors"
                     >
-                        <X size={24}/>
-                    </SecondaryButton>
+                        <X size={24} />
+                    </button>
                 </div>
-                <form onSubmit={handleSubmit} method="POST">
 
-                    <div className="p-8">
+                <div className="overflow-y-auto p-6 sm:p-10 custom-scrollbar">
+                    <form onSubmit={handleSubmit}>
                         {/* Title */}
-                        <h2 className="text-2xl font-bold mb-8 text-[#DEF9F6] tracking-tight">Edit playlist</h2>
+                        <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-[#DEF9F6] tracking-tight">
+                            Edit playlist
+                        </h2>
 
-                        {/* Upload image */}
-                        <div className="flex items-center gap-6 mb-10">
-                            <div
-                                className="w-32 h-32 bg-[#d1d1d1] rounded-2xl flex items-center justify-center shadow-inner relative group cursor-pointer overflow-hidden">
-                                <Camera size={32} className="text-gray-500 group-hover:scale-110 transition-transform"/>
-                                <input type="file" onChange={handleInputChange}
-                                       value={formData.playlistImage}
-                                       className="absolute inset-0 opacity-0 cursor-pointer"/>
+                        {/* Upload image section */}
+                        <div className="flex flex-col sm:flex-row items-center gap-6 mb-10">
+                            <div className="relative group cursor-pointer">
+                                <div className="w-32 h-32 sm:w-40 sm:h-40 bg-gray-300 rounded-2xl flex items-center justify-center shadow-inner overflow-hidden">
+                                    <Camera size={32} className="text-gray-500 group-hover:scale-110 transition-transform" />
+                                    <input
+                                        type="file"
+                                        onChange={handleInputChange}
+                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                    />
+                                </div>
                             </div>
-                            <div className="flex flex-col">
-                                <span className="text-lg font-semibold text-[#DEF9F6]">Upload img</span>
+                            <div className="flex flex-col text-center sm:text-left">
+                                <span className="text-lg font-semibold text-[#DEF9F6]">Upload cover image</span>
                                 <span className="text-xs text-gray-400">PNG or JPG (max. 5MB)</span>
                             </div>
                         </div>
 
                         {/* Playlist name */}
                         <div className="mb-8">
-                            <label className="block text-sm font-semibold text-[#DEF9F6] mb-2 uppercase tracking-wider">Playlist
-                                name</label>
+                            <label className="block text-xs font-bold text-[#DEF9F6] mb-2 uppercase tracking-widest opacity-70">
+                                Playlist name
+                            </label>
                             <input
                                 type="text"
-                                placeholder="playlist1..."
+                                placeholder="My awesome playlist..."
                                 value={formData.playlistName}
                                 onChange={handleInputChange}
-                                className="w-full bg-[#d1d1d1] border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-400 outline-none transition-all placeholder:text-gray-500"
+                                className="w-full bg-white/10 text-white border-none rounded-xl px-4 py-4 focus:ring-2 focus:ring-teal-400 outline-none transition-all placeholder:text-gray-500"
                             />
                         </div>
 
-                        {/* Search collaboraters */}
+                        {/* Collaborators */}
                         <div className="mb-10">
-                            <label className="block text-sm font-semibold text-[#DEF9F6] mb-2 uppercase tracking-wider">Add
-                                collaborators</label>
+                            <label className="block text-xs font-bold text-[#DEF9F6] mb-2 uppercase tracking-widest opacity-70">
+                                Add collaborators
+                            </label>
                             <div className="relative mb-6">
                                 <input
                                     type="text"
                                     placeholder="Search friends..."
-                                    className="w-full bg-[#d1d1d1] border-none rounded-xl pl-4 pr-10 py-3 focus:ring-2 focus:ring-red-400 outline-none transition-all placeholder:text-gray-500"
+                                    className="w-full bg-white/10 text-white border-none rounded-xl pl-4 pr-12 py-4 focus:ring-2 focus:ring-teal-400 outline-none transition-all placeholder:text-gray-500"
                                     onChange={handleInputChange}
                                     value={formData.collaborators}
                                 />
-                                <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#181919]"/>
+                                <Search size={20} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" />
                             </div>
 
-                            {/* Friend list*/}
-                            <div className="flex justify-between items-center px-2">
-                                <div className="flex -space-x-3 overflow-hidden">
+                            {/* Friend list */}
+                            <div className="flex flex-wrap items-center gap-3 px-1">
+                                <div className="flex -space-x-3">
                                     {collaborators.map((user) => (
                                         <img
                                             key={user.id}
-                                            className="inline-block h-16 w-16 rounded-full ring-4 ring-[#f0f0f0] object-cover hover:scale-110 transition-transform cursor-pointer"
+                                            className="inline-block h-12 w-12 sm:h-14 sm:w-14 rounded-full ring-4 ring-[#0D2132] object-cover hover:translate-y-[-4px] transition-transform cursor-pointer"
                                             src={user.image}
                                             alt={user.name}
                                         />
                                     ))}
-                                    <button
-                                        className="h-16 w-16 rounded-full bg-white flex items-center justify-center ring-4 ring-[#f0f0f0] text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors shadow-sm">
-                                        {/* Size of the profile image */}
-                                        <UserPlus size={24}/>
-                                    </button>
                                 </div>
+                                <button
+                                    type="button"
+                                    className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-teal-500/10 border-2 border-dashed border-teal-500/30 flex items-center justify-center text-teal-500 hover:bg-teal-500 hover:text-white transition-all shadow-sm"
+                                >
+                                    <UserPlus size={20} />
+                                </button>
                             </div>
                         </div>
-                        <div className="flex justify-center w-full">
-                            {/* Save button */}
-                            <PrimaryButton type="submit">
-                                Save
-                            </PrimaryButton>
+
+                        <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                            <button
+                                type="submit"
+                                className="w-full bg-teal-500 hover:bg-teal-400 text-[#0D2132] font-bold py-4 rounded-xl transition-all active:scale-95"
+                            >
+                                Save Changes
+                            </button>
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="w-full sm:hidden bg-white/5 text-white py-4 rounded-xl font-semibold"
+                            >
+                                Cancel
+                            </button>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
 
