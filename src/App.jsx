@@ -5,7 +5,6 @@ import Home from "./pages/home.jsx";
 import Statistics from "./pages/Statistics.jsx";
 import Library from "./pages/Library.jsx";
 import Error from "./pages/Error.jsx";
-import MusicPlayer from "./components/MusicPlayer.jsx";
 import Preferences from "./pages/Preferences.jsx";
 import CreatePlaylistComponent from "./components/CreatePlaylistComponent.jsx";
 
@@ -32,21 +31,17 @@ const router = createBrowserRouter([
                 element: <Preferences/>
             },
 
-      { path: "/preferences",
-        element: <Preferences /> },
+            { path: "/createPlaylist",
+                element: <CreatePlaylistComponent />
+            },
 
-        { path: "/createPlaylist",
-            element: <CreatePlaylistComponent /> },
-
-      {
-        path: "/dashboard",
-        element: <Dashboard />,
-      },
-    ],
-  },
+              {
+                path: "/dashboard",
+                element: <Dashboard />,
+              },
             {
                 path: "/createPlaylist",
-                element: <CreatePlaylistComponent/>
+                element: <CreatePlaylistComponent />
             },
         ],
     },
