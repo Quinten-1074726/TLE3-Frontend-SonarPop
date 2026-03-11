@@ -1,7 +1,7 @@
-import Sjoerd from "../../assets/sjoerd.jpg";
+import notFound from "../../assets/Image-not-found.png";
 
 function SongCard({ card }) {
-    const image = card?.image || card?.cover || card?.avatar || Sjoerd;
+    const image = card?.image || card?.cover || card?.avatar || notFound;
     const songName = card?.name || card?.title || "Not Found";
     const artistName = card?.artist || card?.artistName || "Not Found";
 

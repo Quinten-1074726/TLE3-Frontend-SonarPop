@@ -1,4 +1,4 @@
-import Sjoerd from "../../assets/sjoerd.jpg";
+import notFound from "../../assets/Image-not-found.png";
 
 function GenreCard({ genre }) {
     const genreName = "Not Found";
@@ -7,7 +7,7 @@ function GenreCard({ genre }) {
         <>
             <div className="w-40 rounded-xl overflow-hidden p-4 flex flex-col">
                 <img
-                    src={genre?.avatar || Sjoerd }
+                    src={genre?.avatar || notFound }
                     alt="Sjoerd"
                     className="w-full h-28 object-cover rounded-2xl mb-4" />
                 <p className="text-sm font-bold text-text-primary truncate">{genre?.name|| genreName}</p>
