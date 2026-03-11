@@ -4,9 +4,8 @@ import CreatePlaylistComponent from "../components/CreatePlaylistComponent.jsx";
 import ProfileCarousel from "../components/Cards & Carousels/ProfileCarousel.jsx";
 import SongCarousel from "../components/Cards & Carousels/SongCarousel.jsx";
 import PageHeader from "../components/ui/PageHeader.jsx";
-import ArtistCarousel from "../components/Cards & Carousels/ArtistCarousel.jsx";
-import AlbumCarousel from "../components/Cards & Carousels/AlbumCarousel.jsx";
 import {useNavigate} from "react-router";
+import {Link} from "react-router";
 
 const cardsTitle = "Omdat je Sjoerd leuk vindt" // Title die straks als prop kan worden ingeladen
 const dummyCards = [
@@ -20,20 +19,6 @@ const dummyProfiles = [
     {name: "Jan"},
     {name: "Piet"},
     {name: "Klaas"},
-];
-
-const artistTitle = "Ontdek meer artiesten" // Title die straks als prop kan worden ingeladen
-const dummyArtists = [
-    { name: "Sabrina Carpenter" },
-    { name: "Suzan & Freek" },
-    { name: "Ronnie Flex" },
-];
-
-const albumTitle = "Zie meer albums" // Title die straks als prop kan worden ingeladen
-const dummyAlbums = [
-    { name: "Geluk", artist: "Guus Meeuwis" },
-    { name: "De nacht is van ons", artist: "Antoon" },
-    { name: "Gedeeld door ons", artist: "Suzan $ Freek" },
 ];
 
 function Library() {
