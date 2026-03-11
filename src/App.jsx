@@ -10,6 +10,7 @@ import CreatePlaylistComponent from "./components/CreatePlaylistComponent.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 
+import Dashboard from "./pages/dashboard/Dashboard.jsx";
 const router = createBrowserRouter([
     {
         path: "/login",
@@ -39,9 +40,18 @@ const router = createBrowserRouter([
                 path: "/preferences",
                 element: <Preferences/>
             },
+
+            { path: "/createPlaylist",
+                element: <CreatePlaylistComponent />
+            },
+
+              {
+                path: "/dashboard",
+                element: <Dashboard />,
+              },
             {
-                path: "/createPlaylist",
-                element: <CreatePlaylistComponent/>
+                path: "/playlist",
+                element: <Playlist/>
             },
         ],
     },
