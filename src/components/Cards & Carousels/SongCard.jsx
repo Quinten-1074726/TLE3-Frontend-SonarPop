@@ -1,9 +1,9 @@
-import Sjoerd from "../assets/sjoerd.jpg";
+import Sjoerd from "../../assets/sjoerd.jpg";
 
 function SongCard({ card }) {
     //Hardcoded data
-    const cardName = "Vandaag is Sjoerd";
-    const cardArtist = "Sjoerd Sjoerdsma";
+    const cardName = "Not Found";
+    const cardArtist = "Not Found";
 
     return(
         <>

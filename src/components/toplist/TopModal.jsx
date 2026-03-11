@@ -1,5 +1,6 @@
 import { HiOutlineXMark } from "react-icons/hi2";
 import TopList from "./TopList";
+import DonutChart from "../charts/DonutChart";
 
 const TITLE_BY_TYPE = {
   artist: "Top Artists",
@@ -8,8 +9,18 @@ const TITLE_BY_TYPE = {
   genre: "Top Genres",
 };
 
-function TopModal({ type, title, items = [], isLoading = false, onClose, onSelectItem }) {
+function TopModal({
+  type,
+  title,
+  items = [],
+  isLoading = false,
+  onClose,
+  onSelectItem,
+}) {
   const heading = title || TITLE_BY_TYPE[type] || "Top 10";
+
+  const chartLabels = items.slice(0, 5).map((item) => item.name);
+  const chartValues = items.slice(0, 5).map((item) => item.chartValue ?? item.valueNumber ?? 0);
 
   return (
     <div className="absolute inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
@@ -23,7 +34,6 @@ function TopModal({ type, title, items = [], isLoading = false, onClose, onSelec
           overflow-hidden
         "
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
           <h2 className="text-text-primary text-lg font-semibold">
             {heading}
@@ -43,9 +53,7 @@ function TopModal({ type, title, items = [], isLoading = false, onClose, onSelec
           </button>
         </div>
 
-        {/* Content */}
-        <div className="px-3 py-3 max-h-[60vh] overflow-y-auto">
-
+        <div className="px-3 py-3 max-h-[75vh] overflow-y-auto">
           {isLoading && (
             <div className="py-8 text-center text-white/60">
               Loading...
@@ -59,9 +67,18 @@ function TopModal({ type, title, items = [], isLoading = false, onClose, onSelec
           )}
 
           {!isLoading && items.length > 0 && (
-            <TopList items={items} onSelect={onSelectItem} />
-          )}
+            <>
+              <TopList items={items} onSelect={onSelectItem} limit={5} />
 
+              <div className="mt-6 border-t border-white/10 pt-4">
+                <DonutChart
+                  labels={chartLabels}
+                  values={chartValues}
+                  chartLabel={heading}
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

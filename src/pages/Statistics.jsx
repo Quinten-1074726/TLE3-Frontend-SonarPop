@@ -1,48 +1,51 @@
 import { useState } from "react";
 import TopModal from "../components/toplist/TopModal";
 import PageHeader from "../components/ui/PageHeader.jsx";
-
-const MOCK = {
-  artist: [
-    { id: "a1", type: "artist", name: "Suzanne & Freek", subtitle: "Artist", value: "1843 min", imageUrl: "" },
-    { id: "a2", type: "artist", name: "Bløf", subtitle: "Artist", value: "1632 min", imageUrl: "" },
-    { id: "a3", type: "artist", name: "Roxy Dekker", subtitle: "Artist", value: "1409 min", imageUrl: "" },
-  ],
-  album: [
-    { id: "al1", type: "album", name: "Midnight Waves", subtitle: "Ava Storm", value: "520 min", imageUrl: "" },
-    { id: "al2", type: "album", name: "Neon Streets", subtitle: "Noah Beats", value: "441 min", imageUrl: "" },
-  ],
-  song: [
-    { id: "s1", type: "song", name: "Ocean Lights", subtitle: "Midnight Waves", value: "120 plays", imageUrl: "" },
-    { id: "s2", type: "song", name: "City Pulse", subtitle: "Neon Streets", value: "98 plays", imageUrl: "" },
-  ],
-  genre: [
-    { id: "g1", type: "genre", name: "Synthwave", subtitle: "Genre", value: "32 tracks", imageUrl: "" },
-    { id: "g2", type: "genre", name: "Lo-fi Hip Hop", subtitle: "Genre", value: "21 tracks", imageUrl: "" },
-  ],
-};
+import { STATISTICS_MOCK } from "../mocks/statisticsMock.js";
+import PrimaryButton from "../components/PrimaryButton.jsx";
+import notFound from "../assets/Image-not-found.png";
 
 export default function Statistics() {
   const [openType, setOpenType] = useState(null);
 
-  const items = openType ? MOCK[openType] : [];
+  const items = openType ? STATISTICS_MOCK[openType] : [];
 
   return (
     <>
       <PageHeader title="Statistics" />
-      <div className="flex flex-wrap gap-3">
-        <button className="btn-primary" onClick={() => setOpenType("artist")}>
-          Top Artists
-        </button>
-        <button className="btn-secondary" onClick={() => setOpenType("album")}>
-          Top Albums
-        </button>
-        <button className="btn-tertiary" onClick={() => setOpenType("song")}>
-          Top Songs
-        </button>
-        <button className="btn-secondary" onClick={() => setOpenType("genre")}>
-          Top Genres
-        </button>
+
+      <div className="grid grid-cols-2 gap-12 mx-6">
+        <div className="">
+          <p className="text-text-primary py-2 text-xl">Top Artist</p>
+          <img src={notFound} alt="Top Artist" className="rounded-xl my-4" />
+          <PrimaryButton onClick={() => setOpenType("artist")}>
+            Top Artists
+          </PrimaryButton>
+        </div>
+
+        <div className="">
+          <p className="text-text-primary py-2 text-xl">Top Genre</p>
+          <img src={notFound} alt="Top Artist" className="rounded-xl my-4" />
+          <PrimaryButton onClick={() => setOpenType("genre")}>
+            Top Genres
+          </PrimaryButton>
+        </div>
+
+        <div className="">
+          <p className="text-text-primary py-2 text-xl">Top Album</p>
+          <img src={notFound} alt="Top Artist" className="rounded-xl my-4" />
+          <PrimaryButton onClick={() => setOpenType("album")}>
+            Top Albums
+          </PrimaryButton>
+        </div>
+
+        <div className="">
+          <p className="text-text-primary py-2 text-xl">Top Song</p>
+          <img src={notFound} alt="Top Artist" className="rounded-xl my-4" />
+          <PrimaryButton onClick={() => setOpenType("song")}>
+            Top Songs
+          </PrimaryButton>
+        </div>
       </div>
 
       {openType && (
