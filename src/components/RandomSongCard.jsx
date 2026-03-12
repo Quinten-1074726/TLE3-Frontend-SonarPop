@@ -8,35 +8,41 @@ export default function RandomSongCard({
   onShuffle,
 }) {
   return (
-    <div className="bg-secondary rounded-2xl px-5 py-4 flex items-center justify-between shadow-md">
-      <div className="flex items-center gap-3 min-w-0">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10">
-          <TbDice5 className="text-text-primary text-2xl" />
+    <div className="w-full max-w-md">
+      <div
+        className="
+          flex items-center justify-between w-full
+          rounded-xl px-5 py-4
+          bg-secondary
+        "
+      >
+        <div className="flex items-center gap-4 min-w-0">
+          <TbDice5 className="text-text-primary text-xl" />
+
+          <span className="text-text-primary font-semibold truncate">
+            {title}
+          </span>
         </div>
 
-        <span className="text-text-primary font-semibold text-xl truncate">
-          {title}
-        </span>
-      </div>
+        <div className="flex items-center gap-4 text-text-primary">
+          <button
+            type="button"
+            aria-label="Shuffle random song"
+            onClick={onShuffle}
+            className="transition hover:scale-110"
+          >
+            <MdShuffle className="text-2xl" />
+          </button>
 
-      <div className="flex items-center gap-4 text-text-primary">
-        <button
-          type="button"
-          aria-label="Shuffle random song"
-          onClick={onShuffle}
-          className="transition hover:scale-110"
-        >
-          <MdShuffle className="text-3xl" />
-        </button>
-
-        <button
-          type="button"
-          aria-label="Play random song"
-          onClick={onPlay}
-          className="transition hover:scale-110"
-        >
-          <HiOutlinePlay className="text-4xl" />
-        </button>
+          <button
+            type="button"
+            aria-label="Play random song"
+            onClick={onPlay}
+            className="transition hover:scale-110"
+          >
+            <HiOutlinePlay className="text-3xl" />
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,17 +1,18 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { MdClose, MdEdit } from "react-icons/md";
+
 import Search from "../components/Search";
 import PrimaryButton from "../components/PrimaryButton.jsx";
 import Slider from "../components/Slider.jsx";
-import { MdClose, MdEdit } from "react-icons/md";
 import { useNav } from "../components/ui/NavContext.jsx";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import MusicPlayer from "../components/MusicPlayer.jsx";
 import SongCarousel from "../components/Cards & Carousels/SongCarousel.jsx";
 import GenreCarousel from "../components/Cards & Carousels/GenreCarousel.jsx";
-import {useNavigate} from "react-router";
+import RandomSongCard from "../components/RandomSongCard.jsx";
 
 export default function Home() {
-  //Check if user is logged in by searching JWT token in localstorage
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,7 +21,7 @@ export default function Home() {
     if (!token) {
       navigate("/login");
     }
-  }, []);
+  }, [navigate]);
 
   const { isSearchOpen } = useNav();
   const [showConfig, setShowConfig] = useState(false);
@@ -28,43 +29,72 @@ export default function Home() {
 
   const toggleConfig = () => setShowConfig((prev) => !prev);
 
-  //Dummy data want back-end is traag
   const dummyCards = [
-    { name: "Sjoerd", artist: "Sjoerd Sjoerdsma" },
-    { name: "Blauwe dag", artist: "Suzan & Freek" },
-    { name: "Brabant", artist: "Guus Meeuwis" },
-  ]
+    {
+      id: "home-song-1",
+      name: "Dromen in Kleur",
+      artist: "Suzan & Freek",
+      image: "https://placehold.co/300x300?text=Dromen+in+Kleur",
+    },
+    {
+      id: "home-song-2",
+      name: "Blauwe Dag",
+      artist: "Suzan & Freek",
+      image: "https://placehold.co/300x300?text=Blauwe+Dag",
+    },
+    {
+      id: "home-song-3",
+      name: "Brabant",
+      artist: "Guus Meeuwis",
+      image: "https://placehold.co/300x300?text=Brabant",
+    },
+  ];
+
   const dummyGenres = [
-    { name: "Hiphop" },
-    { name: "Rock"},
-    { name: "Nederpop" },
-  ]
+    {
+      id: "genre-1",
+      name: "Nederpop",
+      image: "https://placehold.co/300x300?text=Nederpop",
+    },
+    {
+      id: "genre-2",
+      name: "Rock",
+      image: "https://placehold.co/300x300?text=Rock",
+    },
+    {
+      id: "genre-3",
+      name: "Hip Hop",
+      image: "https://placehold.co/300x300?text=Hip+Hop",
+    },
+  ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-h-screen bg-background text-text-primary pb-28">
       <PageHeader title={isSearchOpen ? "Search" : "Home"} />
 
       <div className="px-6 space-y-6">
         {isSearchOpen ? (
           <Search onSearch={(q) => console.log("search:", q)} />
         ) : (
-          <div className="bg-secondary rounded-xl px-5 py-4 text-text-primary">
-            Liked songs (placeholder)
-          </div>
+          <RandomSongCard
+            title="Random Song"
+            onShuffle={() => console.log("shuffle random song")}
+            onPlay={() => console.log("play random song")}
+          />
         )}
 
         {!showConfig && (
-            <div className="fixed bottom-44 left-1/2 -translate-x-1/2 w-full max-w-107.5 pointer-events-none">
-                <div className="absolute right-4 pointer-events-auto transition-all duration-300 ease-in-out">
-                    <PrimaryButton onClick={toggleConfig}>
-                        <MdEdit className="text-text-primary text-3xl" />
-                    </PrimaryButton>
-                </div>
+          <div className="fixed bottom-44 left-1/2 -translate-x-1/2 w-full max-w-107.5 pointer-events-none z-[1100]">
+            <div className="absolute right-4 pointer-events-auto transition-all duration-300 ease-in-out">
+              <PrimaryButton onClick={toggleConfig}>
+                <MdEdit className="text-text-primary text-3xl" />
+              </PrimaryButton>
             </div>
+          </div>
         )}
 
         <div
-          className={`fixed bottom-30 left-1/2 -translate-x-1/2 w-120 max-w-[100vw] p-6 z-50 transform transition-all duration-300 ease-out ${
+          className={`fixed bottom-30 left-1/2 -translate-x-1/2 w-120 max-w-[100vw] p-6 z-[1100] transform transition-all duration-300 ease-out ${
             showConfig
               ? "opacity-100 translate-y-0 scale-100"
               : "opacity-0 translate-y-10 scale-95 pointer-events-none"
@@ -78,15 +108,13 @@ export default function Home() {
           </button>
 
           <Slider value={sliderValue} onChange={setSliderValue} />
-
-
         </div>
       </div>
+
       <SongCarousel title="Recently Played" cards={dummyCards} />
-      <GenreCarousel title="You might like" genres={dummyGenres} />
-        <div className="fixed bottom-11 left-1/2 -translate-x-1/2 w-115 max-w-[100vw] z-50 transform transition-all duration-300 ease-out">
-          <MusicPlayer/>
-    </div>
+      <GenreCarousel title="Genres you might like" genres={dummyGenres} />
+
+      <MusicPlayer />
     </div>
   );
 }

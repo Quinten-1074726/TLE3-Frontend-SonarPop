@@ -24,7 +24,7 @@ export default function Statistics() {
 
   return (
     <>
-      <PageHeader title="Statistics" />
+      <PageHeader title="Your Statistics" />
 
       <div className="grid grid-cols-2 gap-12 mx-6">
         <div className="">

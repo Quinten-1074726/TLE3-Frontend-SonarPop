@@ -5,15 +5,18 @@ function ProfileCard({ profile }) {
     const username = profile?.username || profile?.name || "Unknown";
 
     return (
-        <div className="w-32 flex flex-col items-center">
+        <div className="w-40 flex flex-col items-center">
             <img
                 src={avatar}
                 alt={username}
-                className="w-28 h-28 rounded-full object-cover"
+                className="w-32 h-32 rounded-full object-cover"
             />
-            <p className="mt-3 font-semibold text-text-primary text-center text-lg leading-tight">
-                {username}
-            </p>
+
+            <div className="mt-4 min-h-[56px] flex items-start justify-center">
+                <p className="font-semibold text-text-primary text-center text-lg leading-tight line-clamp-2">
+                    {username}
+                </p>
+            </div>
         </div>
     );
 }
