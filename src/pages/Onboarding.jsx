@@ -59,6 +59,7 @@ function Onboarding() {
         try {
             console.log("POST /onboarding body:", JSON.stringify({
                 genres: selectedGenres,
+                artists: ["Daft Punk", "Radiohead", "Nirvana"], //Hardcoded, want back-end wil per se artiesten -> gaat front-end achteraan
                 app: "sonarpop"
             }))
             const response = await fetch(`${BASE_URL}/onboarding`, {
@@ -70,13 +71,15 @@ function Onboarding() {
                 },
                 body: JSON.stringify({
                     genres: selectedGenres,
+                    artists: ["Daft Punk", "Radiohead", "Nirvana"],
                     app: "sonarpop"
                 }),
             });
 
             if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message || `Request failed: ${response.status}`);
+                const data = await response.json().catch(() => null);
+                console.error("Server response:", data);
+                throw new Error(data?.message || `Request failed: ${response.status}`);
             }
 
             navigate("/");
