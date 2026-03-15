@@ -39,7 +39,11 @@ function Login() {
                 localStorage.setItem("user", JSON.stringify({ username }));
             }
 
-            navigate("/");
+            if (data.user && !data.user.hasCompletedOnboarding) {
+                navigate("/onboarding");
+            } else {
+                navigate("/");
+            }
         } catch (err) {
             console.error(err);
             setError("Unable to connect to the server.");
