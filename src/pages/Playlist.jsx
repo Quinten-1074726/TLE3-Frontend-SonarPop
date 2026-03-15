@@ -1,5 +1,5 @@
 import PrimaryButton from "../components/PrimaryButton.jsx";
-import {Link} from "react-router";
+import { Link } from "react-router-dom";
 import {useState} from "react";
 import {MdClose, MdEdit, MdDelete, MdKeyboardArrowLeft} from "react-icons/md";
 import {FaPeopleGroup} from "react-icons/fa6";

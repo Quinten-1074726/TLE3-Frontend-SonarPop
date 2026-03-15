@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { MdClose, MdEdit } from "react-icons/md";
 
 import Search from "../components/Search";
@@ -9,19 +7,10 @@ import { useNav } from "../components/ui/NavContext.jsx";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import MusicPlayer from "../components/MusicPlayer.jsx";
 import SongCarousel from "../components/Cards & Carousels/SongCarousel.jsx";
-import GenreCarousel from "../components/Cards & Carousels/GenreCarousel.jsx";
 import RandomSongCard from "../components/RandomSongCard.jsx";
+import { useState } from "react";
 
 export default function Home() {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      navigate("/login");
-    }
-  }, [navigate]);
 
   const { isSearchOpen } = useNav();
   const [showConfig, setShowConfig] = useState(false);

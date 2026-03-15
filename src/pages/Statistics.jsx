@@ -4,19 +4,8 @@ import PageHeader from "../components/ui/PageHeader.jsx";
 import { STATISTICS_MOCK } from "../mocks/statisticsMock.js";
 import PrimaryButton from "../components/PrimaryButton.jsx";
 import notFound from "../assets/Image-not-found.png";
-import {useNavigate} from "react-router";
 
 export default function Statistics() {
-  //Check if user is logged in by searching JWT token in localstorage
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      navigate("/login");
-    }
-  }, []);
 
   const [openType, setOpenType] = useState(null);
 
