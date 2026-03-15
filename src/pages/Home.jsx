@@ -50,24 +50,6 @@ export default function Home() {
     },
   ];
 
-  const dummyGenres = [
-    {
-      id: "genre-1",
-      name: "Nederpop",
-      image: "https://placehold.co/300x300?text=Nederpop",
-    },
-    {
-      id: "genre-2",
-      name: "Rock",
-      image: "https://placehold.co/300x300?text=Rock",
-    },
-    {
-      id: "genre-3",
-      name: "Hip Hop",
-      image: "https://placehold.co/300x300?text=Hip+Hop",
-    },
-  ];
-
   return (
     <div className="space-y-6 min-h-screen bg-background text-text-primary pb-28">
       <PageHeader title={isSearchOpen ? "Search" : "Home"} />
@@ -112,7 +94,6 @@ export default function Home() {
       </div>
 
       <SongCarousel title="Recently Played" cards={dummyCards} />
-      <GenreCarousel title="Genres you might like" genres={dummyGenres} />
 
       <MusicPlayer />
     </div>
