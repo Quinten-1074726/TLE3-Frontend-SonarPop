@@ -9,7 +9,6 @@ import { useNav } from "../components/ui/NavContext.jsx";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import MusicPlayer from "../components/MusicPlayer.jsx";
 import SongCarousel from "../components/Cards & Carousels/SongCarousel.jsx";
-import GenreCarousel from "../components/Cards & Carousels/GenreCarousel.jsx";
 import RandomSongCard from "../components/RandomSongCard.jsx";
 
 export default function Home() {
@@ -29,44 +28,56 @@ export default function Home() {
 
   const toggleConfig = () => setShowConfig((prev) => !prev);
 
-  const dummyCards = [
-    {
-      id: "home-song-1",
-      name: "Dromen in Kleur",
-      artist: "Suzan & Freek",
-      image: "https://placehold.co/300x300?text=Dromen+in+Kleur",
-    },
-    {
-      id: "home-song-2",
-      name: "Blauwe Dag",
-      artist: "Suzan & Freek",
-      image: "https://placehold.co/300x300?text=Blauwe+Dag",
-    },
-    {
-      id: "home-song-3",
-      name: "Brabant",
-      artist: "Guus Meeuwis",
-      image: "https://placehold.co/300x300?text=Brabant",
-    },
-  ];
+  const [recommendedTracks, setRecommendedTracks] = useState([]);
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
+  const API_KEY = import.meta.env.VITE_API_KEY;
 
-  const dummyGenres = [
-    {
-      id: "genre-1",
-      name: "Nederpop",
-      image: "https://placehold.co/300x300?text=Nederpop",
-    },
-    {
-      id: "genre-2",
-      name: "Rock",
-      image: "https://placehold.co/300x300?text=Rock",
-    },
-    {
-      id: "genre-3",
-      name: "Hip Hop",
-      image: "https://placehold.co/300x300?text=Hip+Hop",
-    },
-  ];
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    //Generate recommendations
+    const fetchRecommendations = async () => {
+      try {
+        //Compute profile vector
+        const profileRes = await fetch(`${BASE_URL}/profile/compute`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "X-API-Key": API_KEY,
+            "Content-Type": "application/json",
+          },
+        });
+        const profileData = await profileRes.json();
+        const profileVector = profileData.vector;
+
+        //Fetch recommendations
+        const recRes = await fetch(`${BASE_URL}/recommendations`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "X-API-Key": API_KEY,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            profileVector,
+            limit: 8,   // 8 songs
+            dial: 3,    // neutral for now
+          }),
+        });
+
+        const recData = await recRes.json();
+        if (!recRes.ok) throw new Error(recData.message || "Failed to fetch recommendations");
+
+        //Save tracks in state
+        setRecommendedTracks(recData.tracks.map(t => t.track));
+      } catch (err) {
+        console.error("Error fetching recommendations:", err);
+      }
+    };
+
+    fetchRecommendations();
+  }, []);
+
 
   return (
     <div className="space-y-6 min-h-screen bg-background text-text-primary pb-28">
@@ -111,8 +122,15 @@ export default function Home() {
         </div>
       </div>
 
-      <SongCarousel title="Recently Played" cards={dummyCards} />
-      <GenreCarousel title="Genres you might like" genres={dummyGenres} />
+      <SongCarousel
+          title="You might like"
+          cards={recommendedTracks.map(t => ({
+            id: t._id,
+            title: t.title,
+            artist: t.artist,
+            genreVector: t.genreVector, // optional
+          }))}
+      />
 
       <MusicPlayer />
     </div>
