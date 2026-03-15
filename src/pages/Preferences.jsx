@@ -7,7 +7,6 @@ import {useNavigate} from "react-router";
 function Preferences() {
     //Check if user is logged in
     const navigate = useNavigate();
-
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -25,16 +24,19 @@ function Preferences() {
         { key: "songs", label: "Songs" }
     ];
 
+    //Start with empty lists, fetch request will fill them from database
     const [lists, setLists] = useState({
         genres: [],
         artists: [],
         songs: []
     });
-
+    //Start at genres tab when reloading page
     const [activeTab, setActiveTab] = useState("genres");
 
     const BASE_URL = import.meta.env.VITE_BASE_URL;
     const API_KEY = import.meta.env.VITE_API_KEY;
+
+    //Fetch request for getting blacklist items per user
     const fetchLists = async () => {
         const token = localStorage.getItem("token");
 
@@ -78,11 +80,32 @@ function Preferences() {
         fetchLists();
     }, []);
 
-    const removeItem = (id) => {
-        setLists(prev => ({
-            ...prev,
-            [activeTab]: prev[activeTab].filter(item => item._id !== id)
-        }));
+    //Fetch request for deleting items in blacklist per user
+    const removeItem = async (entryId) => {
+        const token = localStorage.getItem("token");
+        try {
+            const response = await fetch(`${BASE_URL}/blacklist/${entryId}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                    "X-API-Key": API_KEY,
+                },
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || "Failed to delete");
+
+            // update lists state with new blacklist
+            setLists({
+                genres: data.entries.filter(e => e.type === "genre"),
+                artists: data.entries.filter(e => e.type === "artist"),
+                songs: data.entries.filter(e => e.type === "track"),
+            });
+
+        } catch (err) {
+            console.error("Error deleting item", err);
+        }
     };
 
     return (
@@ -162,18 +185,21 @@ function Preferences() {
                                         const value = prompt("Add item");
                                         if (!value) return;
 
-                                        const token = localStorage.getItem("token");
-                                        const newItem = {
-                                            type: activeTab === "songs" ? "track" : activeTab.slice(0, -1),
-                                            value: value
-                                        };
-
+                                        //Fetch request for POSTing new item in blacklist per user
                                         try {
+                                            const value = prompt("Add item");
+                                            if (!value) return;
+
+                                            const newItem = {
+                                                type: activeTab === "songs" ? "track" : activeTab.slice(0, -1),
+                                                value: value
+                                            };
+
                                             const response = await fetch(`${BASE_URL}/blacklist`, {
                                                 method: "POST",
                                                 headers: {
                                                     "Content-Type": "application/json",
-                                                    Authorization: `Bearer ${token}`,
+                                                    Authorization: `Bearer ${localStorage.getItem("token")}`,
                                                     "X-API-Key": API_KEY
                                                 },
                                                 body: JSON.stringify(newItem)
@@ -181,12 +207,12 @@ function Preferences() {
 
                                             const data = await response.json();
                                             if (!response.ok) throw new Error(data.message || "Failed to add");
-
-                                            // Backend geeft de opgeslagen entry terug met _id
-                                            setLists(prev => ({
-                                                ...prev,
-                                                [activeTab]: [...prev[activeTab], data]
-                                            }));
+                                            
+                                            setLists({
+                                                genres: data.entries.filter(e => e.type === "genre"),
+                                                artists: data.entries.filter(e => e.type === "artist"),
+                                                songs: data.entries.filter(e => e.type === "track")
+                                            });
 
                                         } catch (err) {
                                             console.error("Error adding item", err);
@@ -200,7 +226,6 @@ function Preferences() {
                         ))}
                     </div>
                 </div>
-
             </section>
         </>
     );
