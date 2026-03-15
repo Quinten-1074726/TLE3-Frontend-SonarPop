@@ -69,6 +69,10 @@ const router = createBrowserRouter([
             path: "/profile",
             element: <Profile />,
           },
+          {
+            path: "/dashboard",
+            element: <Dashboard />,
+          },
         ],
       },
 
@@ -76,8 +80,7 @@ const router = createBrowserRouter([
         element: <RoleRoute allowedRoles={["admin", "curator"]} />,
         children: [
           {
-            path: "/dashboard",
-            element: <Dashboard />,
+
           },
         ],
       },

@@ -1,87 +1,43 @@
-const API_BASE_URL = import.meta.env.VITE_BASE_URL;
-const API_KEY = import.meta.env.VITE_API_KEY;
+import { apiGet, apiPost } from "./Api";
+import { getToken } from "../auth/AuthStorage";
 
-function buildHeaders(token, includeContentType = true) {
-  const headers = {};
+export async function getDashboardBootstrap() {
+  const token = getToken();
 
-  if (includeContentType) {
-    headers["Content-Type"] = "application/json";
-  }
+  const [genres, tracks, dial] = await Promise.allSettled([
+    apiGet("/genres", token),
+    apiGet("/tracks", token),
+    apiGet("/dial", token),
+  ]);
 
-  if (API_KEY) {
-    headers["X-API-Key"] = API_KEY;
-  }
-
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
-  return headers;
+  return {
+    genres: genres.status === "fulfilled" ? genres.value : null,
+    tracks: tracks.status === "fulfilled" ? tracks.value : null,
+    dial: dial.status === "fulfilled" ? dial.value : null,
+  };
 }
 
-async function handleResponse(res, path) {
-  let data = null;
+export async function getRecommendationsPreview(profileVector, dialPosition = 3) {
+  const token = getToken();
 
-  try {
-    data = await res.json();
-  } catch {
-    data = null;
-  }
-
-  if (!res.ok) {
-    const message =
-      data?.message ||
-      data?.error ||
-      `${res.status} ${res.statusText}` ||
-      `Request failed for ${path}`;
-
-    const err = new Error(message);
-    err.status = res.status;
-    err.data = data;
-    throw err;
-  }
-
-  return data;
+  return apiPost(
+    "/recommendations",
+    {
+      profileVector,
+      limit: 10,
+      offset: 0,
+      dial: dialPosition,
+    },
+    token
+  );
 }
 
-export async function apiGet(path, token) {
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    method: "GET",
-    headers: buildHeaders(token, false),
-  });
-
-  return handleResponse(res, path);
+export async function computeProfile(weights = {}) {
+  const token = getToken();
+  return apiPost("/profile/compute", { weights }, token);
 }
 
-export async function apiPost(path, body, token) {
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    method: "POST",
-    headers: buildHeaders(token),
-    body: JSON.stringify(body),
-  });
-
-  return handleResponse(res, path);
-}
-
-export async function apiPut(path, body, token) {
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    method: "PUT",
-    headers: buildHeaders(token),
-    body: JSON.stringify(body),
-  });
-
-  return handleResponse(res, path);
-}
-
-export async function apiDelete(path, token) {
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    method: "DELETE",
-    headers: buildHeaders(token, false),
-  });
-
-  if (res.status === 204) {
-    return { success: true };
-  }
-
-  return handleResponse(res, path);
+export async function getFeedbackList() {
+  const token = getToken();
+  return apiGet("/feedback", token);
 }

@@ -5,9 +5,10 @@ import BarChart from "../../components/charts/BarChart.jsx";
 import LineChart from "../../components/charts/LineChart.jsx";
 import RadarChart from "../../components/charts/RadarChart.jsx";
 
-import * as dashboardService from "../../services/dashboard.js";
-
-console.log(dashboardService);
+import {
+  getDashboardBootstrap,
+  getFeedbackList,
+} from "../../services/dashboard.js";
 
 import { getUserRole } from "../../auth/AuthStorage.js";
 
@@ -16,9 +17,7 @@ function StatCard({ title, value, subtitle }) {
     <div className="rounded-2xl border border-white/10 bg-[#181919] p-4 shadow-sm">
       <p className="text-sm text-white/60">{title}</p>
       <p className="mt-2 text-3xl font-bold text-text-primary">{value}</p>
-      {subtitle ? (
-        <p className="mt-2 text-xs text-white/45">{subtitle}</p>
-      ) : null}
+      {subtitle ? <p className="mt-2 text-xs text-white/45">{subtitle}</p> : null}
     </div>
   );
 }
@@ -31,7 +30,6 @@ function DashboardHome() {
   const [tracks, setTracks] = useState([]);
   const [dial, setDial] = useState(null);
   const [feedback, setFeedback] = useState([]);
-  const [blacklist, setBlacklist] = useState([]);
 
   const role = getUserRole();
 
@@ -43,10 +41,9 @@ function DashboardHome() {
         setLoading(true);
         setError("");
 
-        const [bootstrap, feedbackData, blacklistData] = await Promise.all([
+        const [bootstrap, feedbackData] = await Promise.all([
           getDashboardBootstrap(),
           getFeedbackList().catch(() => []),
-          getBlacklist().catch(() => []),
         ]);
 
         if (!isMounted) return;
@@ -82,16 +79,6 @@ function DashboardHome() {
             ? feedbackData.entries
             : Array.isArray(feedbackData)
             ? feedbackData
-            : []
-        );
-
-        setBlacklist(
-          Array.isArray(blacklistData?.entries)
-            ? blacklistData.entries
-            : Array.isArray(blacklistData?.items)
-            ? blacklistData.items
-            : Array.isArray(blacklistData)
-            ? blacklistData
             : []
         );
       } catch (err) {
@@ -196,7 +183,6 @@ function DashboardHome() {
   const totalTracks = tracks.length;
   const totalGenres = genres.length;
   const totalFeedback = feedback.length;
-  const totalBlacklist = blacklist.length;
 
   if (loading) {
     return (
@@ -229,7 +215,7 @@ function DashboardHome() {
         </p>
       </header>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-6">
+      <section className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard
           title="Tracks"
           value={totalTracks}
@@ -245,14 +231,9 @@ function DashboardHome() {
           value={totalFeedback}
           subtitle="Likes, dislikes en skips"
         />
-        <StatCard
-          title="Blacklist entries"
-          value={totalBlacklist}
-          subtitle="Geblokkeerde tracks, artists of genres"
-        />
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-2 mb-6">
+      <section className="mb-6 grid gap-4 xl:grid-cols-2">
         <div className="rounded-2xl border border-white/10 bg-[#181919] p-4">
           <h2 className="mb-4 text-lg font-semibold">Genre distribution</h2>
           <DonutChart
