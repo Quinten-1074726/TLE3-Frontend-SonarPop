@@ -1,5 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_BASE_URL;
-const API_KEY = import.meta.env.API_KEY;
+const API_KEY = import.meta.env.VITE_API_KEY;
 
 function buildHeaders(token, includeContentType = true) {
     const headers = {};
