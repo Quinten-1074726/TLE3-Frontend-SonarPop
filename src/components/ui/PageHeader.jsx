@@ -9,7 +9,9 @@ function PageHeader({ title, showTitle = true }) {
       "
     >
       {showTitle ? (
-        <h1 className="h2 truncate pr-4">{title}</h1>
+        <h1 className="h2 pr-4 leading-tight break-words">
+          {title}
+        </h1>
       ) : (
         <div />
       )}

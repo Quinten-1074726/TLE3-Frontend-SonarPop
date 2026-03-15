@@ -90,3 +90,26 @@
     line-height: 1.2;
   }
 }
+
+.scrollbar-soft {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(132, 186, 233, 0.8) rgba(255, 255, 255, 0.08);
+}
+
+.scrollbar-soft::-webkit-scrollbar {
+  height: 10px;
+}
+
+.scrollbar-soft::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+}
+
+.scrollbar-soft::-webkit-scrollbar-thumb {
+  background: rgba(132, 186, 233, 0.8);
+  border-radius: 9999px;
+}
+
+.scrollbar-soft::-webkit-scrollbar-thumb:hover {
+  background: rgba(132, 186, 233, 1);
+}

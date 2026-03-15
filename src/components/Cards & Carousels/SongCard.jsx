@@ -1,22 +1,27 @@
-import Sjoerd from "../../assets/sjoerd.jpg";
+import notFound from "../../assets/Image-not-found.png";
 
 function SongCard({ card }) {
-    //Hardcoded data
-    const cardName = "Not Found";
-    const cardArtist = "Not Found";
+    const image = card?.image || card?.cover || card?.avatar || notFound;
+    const songName = card?.name || card?.title || "Unknown song";
+    const artistName = card?.artist || card?.artistName || "Unknown artist";
 
-    return(
-        <>
-            <div className="w-40 rounded-xl overflow-hidden p-4 flex flex-col">
-                <img
-                    src={card?.avatar || Sjoerd }
-                    alt="Sjoerd"
-                    className="w-full h-28 object-cover rounded-2xl mb-4" />
-                <p className="text-sm font-bold text-text-primary truncate">{card?.name|| cardName}</p>
-                <p className="text-xs font-light text-text-primary truncate">{card?.artist || cardArtist}</p>
-            </div>
-        </>
-    )
+    return (
+        <div className="w-36 flex flex-col">
+            <img
+                src={image}
+                alt={songName}
+                className="w-36 h-36 object-cover rounded-xl mb-2"
+            />
+
+            <p className="text-sm font-bold text-text-primary leading-tight truncate">
+                {songName}
+            </p>
+
+            <p className="text-xs text-text-primary/70 leading-tight mt-0.5 truncate">
+                {artistName}
+            </p>
+        </div>
+    );
 }
 
 export default SongCard;

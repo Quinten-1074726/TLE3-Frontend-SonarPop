@@ -1,4 +1,3 @@
-import ProfileCard from "./ProfileCard.jsx";
 import ArtistProfile from "./ArtistProfile.jsx";
 
 function ArtistCarousel({title, artists}) {

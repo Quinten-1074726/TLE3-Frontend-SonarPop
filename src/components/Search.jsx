@@ -16,7 +16,7 @@ const MOCK_RESULTS = [
 ];
 
 const TYPE_LABEL = {
-  user: "User",
+  user: "Artist",
   album: "Album",
   genre: "Genre",
   track: "Nummer",

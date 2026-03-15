@@ -1,17 +1,31 @@
 import ProfileCard from "./ProfileCard.jsx";
 
-function ProfileCarousel({ title, profiles }) {
+function ProfileCarousel({
+    title,
+    profiles = [],
+    emptyText = "No profiles found.",
+}) {
     return (
-        <>
-            <p className="p-4 text-text-primary font-bold text-xl">{title}</p>
-            <div className="overflow-x-auto flex gap-4 p-2 w-full max-w-107.5 snap-x snap-mandatory scrollbar-none">
-                {profiles.map((profile, idx) => (
-                    <div key={idx} className="shrink-0 snap-start">
-                        <ProfileCard profile={profile} />
-                    </div>
-                ))}
-            </div>
-        </>
+        <section className="w-full">
+            <p className="px-4 text-text-primary font-bold text-xl mb-4">
+                {title}
+            </p>
+
+            {profiles.length === 0 ? (
+                <p className="px-4 text-sm text-white/70">{emptyText}</p>
+            ) : (
+                <div className="overflow-x-auto whitespace-nowrap pl-4 pr-5 pb-2 scrollbar-soft">
+                    {profiles.map((profile, idx) => (
+                        <div
+                            key={profile?.id || idx}
+                            className="inline-block align-top mr-8"
+                        >
+                            <ProfileCard profile={profile} />
+                        </div>
+                    ))}
+                </div>
+            )}
+        </section>
     );
 }
 
