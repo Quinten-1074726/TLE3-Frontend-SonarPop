@@ -25,7 +25,15 @@ export default function Home() {
 
   const { isSearchOpen } = useNav();
   const [showConfig, setShowConfig] = useState(false);
-  const [sliderValue, setSliderValue] = useState(0);
+  const [sliderValue, setSliderValue] = useState(() => {
+      const saved = localStorage.getItem("slider_value")
+      return saved !== null ? Number(saved) : 40
+  }) ;
+
+  const handleChangeInput = (value) => {
+      setSliderValue(value)
+      localStorage.setItem("slider_value", value.toString())
+  }
 
   const toggleConfig = () => setShowConfig((prev) => !prev);
 
@@ -89,7 +97,7 @@ export default function Home() {
             <MdClose />
           </button>
 
-          <Slider value={sliderValue} onChange={setSliderValue} />
+          <Slider value={sliderValue} onChange={handleChangeInput} />
         </div>
       </div>
 
