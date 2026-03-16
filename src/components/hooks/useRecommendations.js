@@ -1,8 +1,8 @@
-// THIS FILE IS FOR THE HOME PAGE - CURRENLY LOADS RECOMMENDED SONGS & ARTISTS
+// THIS FILE IS FOR THE HOME PAGE - CURRENTLY LOADS RECOMMENDED SONGS & ARTISTS
 import { useEffect, useState } from "react";
 import notFound from "../../assets/Image-not-found.png";
 
-function useRecommendations() {
+function useRecommendations(sliderValue) {
     const BASE_URL = import.meta.env.VITE_BASE_URL;
     const API_KEY = import.meta.env.VITE_API_KEY;
 
@@ -11,7 +11,9 @@ function useRecommendations() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        let isMounted = true
         async function loadRecommendations() {
+            setLoading(true)
             try {
                 const token = localStorage.getItem("token");
 
@@ -30,18 +32,22 @@ function useRecommendations() {
 
                 const { vector } = await profileRes.json();
 
-                // Get song recommendations
+
+                // Get song recommendations and use sliderValue to change the dial
                 const recRes = await fetch(`${BASE_URL}/recommendations`, {
                     method: "POST",
                     headers,
                     body: JSON.stringify({
                         profileVector: vector,
                         limit: 10,
-                        dial: 3,
+                        dial: sliderValue,
                     }),
                 });
 
+                console.log(sliderValue)
+
                 const data = await recRes.json();
+                console.log(data)
 
                 const mappedTracks = data.tracks.map(({ track }) => ({
                     id: track._id,
@@ -75,12 +81,20 @@ function useRecommendations() {
             } catch (err) {
                 console.error("Recommendations failed", err);
             } finally {
+                if (isMounted) setLoading(false)
                 setLoading(false);
             }
         }
-
-        loadRecommendations();
-    }, []);
+        
+        const handler = setTimeout(() => {
+            loadRecommendations()
+        }, 400)
+        
+        return () => {
+            isMounted = false
+            clearTimeout(handler)
+        }
+    }, [API_KEY, BASE_URL, sliderValue]);
 
     return { tracks, artists, loading };
 }
