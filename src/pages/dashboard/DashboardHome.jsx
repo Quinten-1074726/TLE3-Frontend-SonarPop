@@ -1,279 +1,257 @@
 import { useEffect, useMemo, useState } from "react";
 
-import DonutChart from "../../components/charts/DonutChart.jsx";
 import BarChart from "../../components/charts/BarChart.jsx";
-import LineChart from "../../components/charts/LineChart.jsx";
-import RadarChart from "../../components/charts/RadarChart.jsx";
-
-import {
-  getDashboardBootstrap,
-  getFeedbackList,
-} from "../../services/dashboard.js";
-
+import DonutChart from "../../components/charts/DonutChart.jsx";
+import { getDashboardBootstrap } from "../../services/dashboard.js";
 import { getUserRole } from "../../auth/AuthStorage.js";
 
 function StatCard({ title, value, subtitle }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#181919] p-4 shadow-sm">
+    <div className="rounded-2xl border border-white/10 bg-[#181919] p-5">
       <p className="text-sm text-white/60">{title}</p>
-      <p className="mt-2 text-3xl font-bold text-text-primary">{value}</p>
+      <p className="mt-3 text-3xl font-bold text-text-primary">{value}</p>
       {subtitle ? <p className="mt-2 text-xs text-white/45">{subtitle}</p> : null}
     </div>
   );
 }
 
-function DashboardHome() {
+function Panel({ title, children, helper }) {
+  return (
+    <section className="rounded-2xl border border-white/10 bg-[#181919] p-5">
+      <div className="mb-4">
+        <h2 className="text-xl font-semibold text-text-primary">{title}</h2>
+        {helper ? <p className="mt-1 text-xs text-white/45">{helper}</p> : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function EmptyState({ text }) {
+  return (
+    <div className="flex min-h-[260px] items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/[0.02] p-4 text-sm text-white/50">
+      {text}
+    </div>
+  );
+}
+
+function clamp(value, min = 0, max = 100) {
+  return Math.max(min, Math.min(max, value));
+}
+
+export default function DashboardHome() {
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [bootstrapError, setBootstrapError] = useState("");
 
   const [genres, setGenres] = useState([]);
   const [tracks, setTracks] = useState([]);
-  const [dial, setDial] = useState(null);
-  const [feedback, setFeedback] = useState([]);
+  const [dialPresets, setDialPresets] = useState([]);
 
   const role = getUserRole();
+  const isAdmin = role === "admin";
 
   useEffect(() => {
-    let isMounted = true;
+    let active = true;
 
-    async function loadDashboard() {
+    async function load() {
       try {
         setLoading(true);
-        setError("");
+        setBootstrapError("");
 
-        const [bootstrap, feedbackData] = await Promise.all([
-          getDashboardBootstrap(),
-          getFeedbackList().catch(() => []),
-        ]);
+        const bootstrap = await getDashboardBootstrap();
+        if (!active) return;
 
-        if (!isMounted) return;
+        const normalizedGenres = Array.isArray(bootstrap?.genres?.items)
+          ? bootstrap.genres.items
+          : Array.isArray(bootstrap?.genres)
+          ? bootstrap.genres
+          : [];
 
-        setGenres(
-          Array.isArray(bootstrap?.genres?.items)
-            ? bootstrap.genres.items
-            : Array.isArray(bootstrap?.genres)
-            ? bootstrap.genres
-            : []
-        );
+        const normalizedTracks = Array.isArray(bootstrap?.tracks?.items)
+          ? bootstrap.tracks.items
+          : Array.isArray(bootstrap?.tracks)
+          ? bootstrap.tracks
+          : [];
 
-        setTracks(
-          Array.isArray(bootstrap?.tracks?.items)
-            ? bootstrap.tracks.items
-            : Array.isArray(bootstrap?.tracks)
-            ? bootstrap.tracks
-            : []
-        );
+        const normalizedDial = Array.isArray(bootstrap?.dial?.presets)
+          ? bootstrap.dial.presets
+          : Array.isArray(bootstrap?.dial)
+          ? bootstrap.dial
+          : [];
 
-        setDial(
-          Array.isArray(bootstrap?.dial?.positions)
-            ? bootstrap.dial.positions
-            : Array.isArray(bootstrap?.dial)
-            ? bootstrap.dial
-            : bootstrap?.dial || null
-        );
+        setGenres(normalizedGenres);
+        setTracks(normalizedTracks);
+        setDialPresets(normalizedDial);
 
-        setFeedback(
-          Array.isArray(feedbackData?.items)
-            ? feedbackData.items
-            : Array.isArray(feedbackData?.entries)
-            ? feedbackData.entries
-            : Array.isArray(feedbackData)
-            ? feedbackData
-            : []
-        );
-      } catch (err) {
-        console.error("Failed to load dashboard:", err);
-
-        if (!isMounted) return;
-        setError("Dashboard data kon niet geladen worden.");
-      } finally {
-        if (isMounted) {
-          setLoading(false);
+        const allFailed = !bootstrap?.genres && !bootstrap?.tracks && !bootstrap?.dial;
+        if (allFailed) {
+          setBootstrapError("Dashboarddata kon niet geladen worden.");
         }
+      } catch (error) {
+        if (!active) return;
+        setBootstrapError("Dashboarddata kon niet geladen worden.");
+      } finally {
+        if (active) setLoading(false);
       }
     }
 
-    loadDashboard();
+    load();
 
     return () => {
-      isMounted = false;
+      active = false;
     };
   }, []);
 
-  const genreChartData = useMemo(() => {
-    if (genres.length > 0) {
-      return {
-        labels: genres.slice(0, 5).map((genre) => genre.name || genre.genre || "Unknown"),
-        values: genres.slice(0, 5).map((_, index) => Math.max(5 - index, 1)),
-      };
-    }
-
-    return {
-      labels: ["Pop", "Rock", "HipHop", "Jazz", "Other"],
-      values: [45, 25, 15, 10, 5],
-    };
-  }, [genres]);
-
-  const tracksBarData = useMemo(() => {
-    if (tracks.length > 0) {
-      const labels = tracks.slice(0, 5).map((track, index) => {
-        return track.title || track.name || `Track ${index + 1}`;
-      });
-
-      const values = tracks.slice(0, 5).map((track, index) => {
-        return track.playCount || track.popularity || 10 - index;
-      });
-
-      return { labels, values };
-    }
-
-    return {
-      labels: ["Track A", "Track B", "Track C", "Track D", "Track E"],
-      values: [40, 35, 28, 22, 18],
-    };
-  }, [tracks]);
-
-  const feedbackTrendData = useMemo(() => {
-    if (feedback.length > 0) {
-      const likeCount = feedback.filter((item) => item.action === "like").length;
-      const dislikeCount = feedback.filter((item) => item.action === "dislike").length;
-      const skipCount = feedback.filter((item) => item.action === "skip").length;
-
-      return {
-        labels: ["Likes", "Dislikes", "Skips"],
-        values: [likeCount, dislikeCount, skipCount],
-      };
-    }
-
-    return {
-      labels: ["Likes", "Dislikes", "Skips"],
-      values: [18, 6, 11],
-    };
-  }, [feedback]);
-
-  const radarData = useMemo(() => {
-    if (dial && typeof dial === "object" && !Array.isArray(dial)) {
-      const entries = Object.entries(dial).slice(0, 5);
-
-      if (entries.length > 0) {
-        return {
-          labels: entries.map(([key]) => key),
-          values: entries.map(([, value]) =>
-            typeof value === "number" ? value : 0.5
-          ),
-        };
-      }
-    }
-
-    if (Array.isArray(dial) && dial.length > 0) {
-      return {
-        labels: dial.slice(0, 5).map((_, index) => `Dial ${index + 1}`),
-        values: dial.slice(0, 5).map((value) =>
-          typeof value === "number" ? value : 0.5
-        ),
-      };
-    }
-
-    return {
-      labels: ["Similarity", "Popularity", "History", "Discovery", "Diversity"],
-      values: [0.7, 0.6, 0.8, 0.4, 0.5],
-    };
-  }, [dial]);
-
   const totalTracks = tracks.length;
   const totalGenres = genres.length;
-  const totalFeedback = feedback.length;
+  const totalDialPresets = dialPresets.length;
+
+  const genreDistribution = useMemo(() => {
+    if (genres.length === 0 || tracks.length === 0) {
+      return {
+        labels: [],
+        values: [],
+        allValues: [],
+      };
+    }
+
+    const sums = Array.from({ length: genres.length }, () => 0);
+
+    tracks.forEach((track) => {
+      const vector = Array.isArray(track.genreVector) ? track.genreVector : [];
+      vector.forEach((value, index) => {
+        if (typeof value === "number" && Number.isFinite(value)) {
+          sums[index] += value;
+        }
+      });
+    });
+
+    const combined = genres.map((genre, index) => ({
+      label: genre.name || genre.genre || `Genre ${index + 1}`,
+      value: Number((sums[index] || 0).toFixed(2)),
+    }));
+
+    const sorted = combined
+      .filter((item) => item.value > 0)
+      .sort((a, b) => b.value - a.value);
+
+    return {
+      labels: sorted.slice(0, 5).map((item) => item.label),
+      values: sorted.slice(0, 5).map((item) => item.value),
+      allValues: sorted.map((item) => item.value),
+    };
+  }, [genres, tracks]);
+
+  const dominantGenre = genreDistribution.labels[0] || "—";
+
+  const catalogDiversityScore = useMemo(() => {
+    const values = genreDistribution.allValues;
+    const total = values.reduce((sum, value) => sum + value, 0);
+
+    if (!total || values.length === 0) return null;
+
+    const normalized = values.map((value) => value / total);
+    const concentration = normalized.reduce((sum, value) => sum + value * value, 0);
+
+    return Math.round(clamp((1 - concentration) * 100));
+  }, [genreDistribution]);
+
+  const topVsRestData = useMemo(() => {
+    const values = genreDistribution.allValues;
+
+    if (values.length === 0) {
+      return {
+        labels: ["Top 3 genres", "Overig"],
+        values: [0, 0],
+      };
+    }
+
+    const total = values.reduce((sum, value) => sum + value, 0);
+    if (!total) {
+      return {
+        labels: ["Top 3 genres", "Overig"],
+        values: [0, 0],
+      };
+    }
+
+    const topThree = values.slice(0, 3).reduce((sum, value) => sum + value, 0);
+    const rest = Math.max(total - topThree, 0);
+
+    return {
+      labels: ["Top 3 genres", "Overig"],
+      values: [Number(topThree.toFixed(2)), Number(rest.toFixed(2))],
+    };
+  }, [genreDistribution]);
+
+  const hasGenreData = genreDistribution.labels.length > 0;
+  const hasDonutData = topVsRestData.values.some((value) => value > 0);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#111315] text-text-primary p-6">
-        <p className="text-white/70">Dashboard laden...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-[#111315] text-text-primary p-6">
-        <div className="rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-red-300">
-          {error}
-        </div>
+      <div className="rounded-2xl border border-white/10 bg-[#181919] p-5 text-text-primary">
+        Dashboard laden...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#111315] text-text-primary p-4 md:p-6 lg:p-8">
-      <header className="mb-6">
+    <div className="min-h-screen bg-[#111315] text-text-primary">
+      <header className="mb-8">
         <p className="text-xs uppercase tracking-[0.2em] text-white/45">
           SonarPoppy {role} dashboard
         </p>
-        <h1 className="mt-2 text-3xl font-bold">Dashboard overview</h1>
-        <p className="mt-2 max-w-3xl text-sm text-white/65">
-          Eerste versie van het admin/curator dashboard met gekoppelde backend-data
-          waar beschikbaar, en fallback-data voor visualisatie.
+        <h1 className="mt-2 text-4xl font-bold">Overview</h1>
+        <p className="mt-3 text-sm text-white/60">
+          {isAdmin ? "Admin overview" : "Curator overview"}
         </p>
       </header>
 
-      <section className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      {bootstrapError ? (
+        <div className="mb-6 rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-300">
+          {bootstrapError}
+        </div>
+      ) : null}
+
+      <section className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard title="Tracks" value={totalTracks || "—"} subtitle="Catalogus" />
+        <StatCard title="Genres" value={totalGenres || "—"} subtitle="Beschikbaar" />
         <StatCard
-          title="Tracks"
-          value={totalTracks}
-          subtitle="Beschikbare tracks in huidige response"
+          title="Diversiteit"
+          value={catalogDiversityScore !== null ? `${catalogDiversityScore}%` : "—"}
+          subtitle="Catalogus"
         />
         <StatCard
-          title="Genres"
-          value={totalGenres}
-          subtitle="Genres opgehaald vanuit backend"
-        />
-        <StatCard
-          title="Feedback items"
-          value={totalFeedback}
-          subtitle="Likes, dislikes en skips"
+          title="Dial presets"
+          value={totalDialPresets || "—"}
+          subtitle={dominantGenre !== "—" ? `Dominant: ${dominantGenre}` : "Model"}
         />
       </section>
 
-      <section className="mb-6 grid gap-4 xl:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-[#181919] p-4">
-          <h2 className="mb-4 text-lg font-semibold">Genre distribution</h2>
-          <DonutChart
-            labels={genreChartData.labels}
-            values={genreChartData.values}
-            chartLabel="Genres"
-          />
-        </div>
+      <section className="grid gap-4 xl:grid-cols-[1.35fr_1fr]">
+        <Panel title="Genreprofiel">
+          {hasGenreData ? (
+            <BarChart
+              labels={genreDistribution.labels}
+              values={genreDistribution.values}
+              chartLabel="Genreprofiel"
+            />
+          ) : (
+            <EmptyState text="Nog geen chartdata beschikbaar." />
+          )}
+        </Panel>
 
-        <div className="rounded-2xl border border-white/10 bg-[#181919] p-4">
-          <h2 className="mb-4 text-lg font-semibold">Feedback overview</h2>
-          <LineChart
-            labels={feedbackTrendData.labels}
-            values={feedbackTrendData.values}
-            chartLabel="Feedback"
-          />
-        </div>
-      </section>
-
-      <section className="grid gap-4 xl:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-[#181919] p-4">
-          <h2 className="mb-4 text-lg font-semibold">Track preview</h2>
-          <BarChart
-            labels={tracksBarData.labels}
-            values={tracksBarData.values}
-            chartLabel="Tracks"
-          />
-        </div>
-
-        <div className="rounded-2xl border border-white/10 bg-[#181919] p-4">
-          <h2 className="mb-4 text-lg font-semibold">Dial / model influence</h2>
-          <RadarChart
-            labels={radarData.labels}
-            values={radarData.values}
-            chartLabel="Dial factors"
-          />
-        </div>
+        <Panel title="Concentratie">
+          {hasDonutData ? (
+            <DonutChart
+              labels={topVsRestData.labels}
+              values={topVsRestData.values}
+              chartLabel="Concentratie"
+            />
+          ) : (
+            <EmptyState text="Nog geen chartdata beschikbaar." />
+          )}
+        </Panel>
       </section>
     </div>
   );
 }
-
-export default DashboardHome;

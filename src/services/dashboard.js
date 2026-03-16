@@ -1,43 +1,33 @@
-import { apiGet, apiPost } from "./Api";
+import { apiGet } from "./Api";
 import { getToken } from "../auth/AuthStorage";
+
+// Dashboard gebruikt nu alleen echte, veilige systeem/catalogus data.
+// Geen user-personalisatie endpoints zoals /feedback, /profile/compute of /recommendations.
+//
+// TODO backend endpoints voor latere dashboard-uitbreiding:
+// - GET /admin/dashboard/overview
+// - GET /admin/users
+// - GET /admin/logs
+// - GET /curator/recommendations/summary
+// - GET /curator/interventions
 
 export async function getDashboardBootstrap() {
   const token = getToken();
 
-  const [genres, tracks, dial] = await Promise.allSettled([
+  const [genresResult, tracksResult, dialResult] = await Promise.allSettled([
     apiGet("/genres", token),
     apiGet("/tracks", token),
     apiGet("/dial", token),
   ]);
 
   return {
-    genres: genres.status === "fulfilled" ? genres.value : null,
-    tracks: tracks.status === "fulfilled" ? tracks.value : null,
-    dial: dial.status === "fulfilled" ? dial.value : null,
-  };
-}
-
-export async function getRecommendationsPreview(profileVector, dialPosition = 3) {
-  const token = getToken();
-
-  return apiPost(
-    "/recommendations",
-    {
-      profileVector,
-      limit: 10,
-      offset: 0,
-      dial: dialPosition,
+    genres: genresResult.status === "fulfilled" ? genresResult.value : null,
+    tracks: tracksResult.status === "fulfilled" ? tracksResult.value : null,
+    dial: dialResult.status === "fulfilled" ? dialResult.value : null,
+    errors: {
+      genres: genresResult.status === "rejected" ? genresResult.reason : null,
+      tracks: tracksResult.status === "rejected" ? tracksResult.reason : null,
+      dial: dialResult.status === "rejected" ? dialResult.reason : null,
     },
-    token
-  );
-}
-
-export async function computeProfile(weights = {}) {
-  const token = getToken();
-  return apiPost("/profile/compute", { weights }, token);
-}
-
-export async function getFeedbackList() {
-  const token = getToken();
-  return apiGet("/feedback", token);
+  };
 }

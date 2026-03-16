@@ -13,8 +13,15 @@ import Profile from "./pages/Profile.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Onboarding from "./pages/Onboarding.jsx";
+import Policy from "./pages/Policy.jsx";
 
 import Dashboard from "./pages/dashboard/DashboardHome.jsx";
+import BiasAnalysis from "./pages/dashboard/BiasAnalysis.jsx";
+import ModelSettings from "./pages/dashboard/ModelSettings.jsx";
+import Users from "./pages/dashboard/Users.jsx";
+import Logs from "./pages/dashboard/Logs.jsx";
+
+import DashboardLayout from "./components/ui/DashboardLayout.jsx";
 
 import ProtectedRoute from "./auth/ProtectedRoute.jsx";
 import RoleRoute from "./auth/RoleRoute.jsx";
@@ -70,8 +77,8 @@ const router = createBrowserRouter([
             element: <Profile />,
           },
           {
-            path: "/dashboard",
-            element: <Dashboard />,
+            path: "/policy",
+            element: <Policy />,
           },
         ],
       },
@@ -80,7 +87,36 @@ const router = createBrowserRouter([
         element: <RoleRoute allowedRoles={["admin", "curator"]} />,
         children: [
           {
-
+            path: "/dashboard",
+            element: <DashboardLayout />,
+            children: [
+              {
+                index: true,
+                element: <Dashboard />,
+              },
+              {
+                path: "bias-analysis",
+                element: <BiasAnalysis />,
+              },
+              {
+                element: <RoleRoute allowedRoles={["admin"]} />,
+                children: [
+                  {
+                    path: "model-settings",
+                    element: <ModelSettings />,
+                  },
+                  {
+                    path: "users",
+                    element: <Users />,
+                  },
+                  {
+                    path: "logs",
+                    element: <Logs />,
+                  },
+ 
+                ],
+              },
+            ],
           },
         ],
       },
