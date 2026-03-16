@@ -1,13 +1,16 @@
 import PreferenceSlider from "../components/PreferenceSlider.jsx";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import PrimaryButton from "../components/PrimaryButton.jsx";
 
 function Preferences() {
+    const BASE_URL = import.meta.env.VITE_BASE_URL;
+    const API_KEY = import.meta.env.VITE_API_KEY;
 
-    const [hiphop, setHiphop] = useState(50);
-    const [pop, setPop] = useState(50);
-    const [rock, setRock] = useState(50);
+    const [sliders, setSliders] = useState({});
+    const [lists, setLists] = useState({ genres: [], artists: [], songs: [] });
+    const [activeTab, setActiveTab] = useState("genres");
+    const [viewAll, setViewAll] = useState(false); // toggle voor top 5 / all
 
     const tabs = [
         { key: "genres", label: "Genres" },
@@ -15,22 +18,37 @@ function Preferences() {
         { key: "songs", label: "Songs" }
     ];
 
-    //Start with empty lists, fetch request will fill them from database
-    const [lists, setLists] = useState({
-        genres: [],
-        artists: [],
-        songs: []
-    });
-    //Start at genres tab when reloading page
-    const [activeTab, setActiveTab] = useState("genres");
+    // --- Fetch sliders ---
+    const fetchSliders = async () => {
+        const token = localStorage.getItem("token");
+        try {
+            const res = await fetch(`${BASE_URL}/sliders`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                    "X-API-Key": API_KEY
+                }
+            });
+            if (!res.ok) throw new Error("Failed to fetch sliders");
+            const data = await res.json();
 
-    const BASE_URL = import.meta.env.VITE_BASE_URL;
-    const API_KEY = import.meta.env.VITE_API_KEY;
+            const defaultGenres = ["rock", "pop", "jazz", "electronic", "hip-hop"];
+            const slidersData = Object.keys(data.sliders).length ? data.sliders :
+                Object.fromEntries(defaultGenres.map(g => [g, 1.0]));
 
-    //Fetch request for getting blacklist items per user
+            setSliders(slidersData);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    useEffect(() => {
+        fetchSliders();
+    }, []);
+
+    // --- Fetch blacklist ---
     const fetchLists = async () => {
         const token = localStorage.getItem("token");
-
         try {
             const response = await fetch(`${BASE_URL}/blacklist`, {
                 method: "GET",
@@ -40,20 +58,10 @@ function Preferences() {
                     "X-API-Key": API_KEY
                 },
             });
-
+            if (!response.ok) throw new Error("Failed to fetch blacklist");
             const data = await response.json();
 
-            if (!response.ok) {
-                console.error(data.message || "Failed to fetch blacklist");
-                return;
-            }
-
-            const formatted = {
-                genres: [],
-                artists: [],
-                songs: []
-            };
-
+            const formatted = { genres: [], artists: [], songs: [] };
             data.entries.forEach(entry => {
                 if (entry.type === "genre") formatted.genres.push(entry);
                 if (entry.type === "artist") formatted.artists.push(entry);
@@ -61,9 +69,8 @@ function Preferences() {
             });
 
             setLists(formatted);
-
         } catch (err) {
-            console.error("Can't connect to server", err);
+            console.error(err);
         }
     };
 
@@ -71,7 +78,6 @@ function Preferences() {
         fetchLists();
     }, []);
 
-    //Fetch request for deleting items in blacklist per user
     const removeItem = async (entryId) => {
         const token = localStorage.getItem("token");
         try {
@@ -83,34 +89,84 @@ function Preferences() {
                     "X-API-Key": API_KEY,
                 },
             });
-
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message || "Failed to delete");
+            if (!response.ok) throw new Error("Failed to delete");
 
-            // update lists state with new blacklist
             setLists({
                 genres: data.entries.filter(e => e.type === "genre"),
                 artists: data.entries.filter(e => e.type === "artist"),
                 songs: data.entries.filter(e => e.type === "track"),
             });
-
         } catch (err) {
-            console.error("Error deleting item", err);
+            console.error(err);
         }
     };
 
+    // --- Sort sliders op waarde voor top genres ---
+    const sortedSliders = Object.entries(sliders)
+        .sort((a, b) => b[1] - a[1]); // hoge waarde eerst
+    const displayedSliders = viewAll ? sortedSliders : sortedSliders.slice(0, 5);
+
     return (
         <>
-            <PageHeader title="Preferences"/>
+            <PageHeader title="Preferences" />
+            <p className="text-text-primary mx-6">Fine-tune your music taste for smarter suggestions.</p>
 
+            {/* --- Genre sliders --- */}
             <section className="mb-12">
-                <PreferenceSlider label="Hiphop" value={hiphop} onChange={setHiphop}/>
-                <PreferenceSlider label="Pop" value={pop} onChange={setPop}/>
-                <PreferenceSlider label="Rock" value={rock} onChange={setRock}/>
+                {displayedSliders.map(([genre, value]) => (
+                    <PreferenceSlider
+                        key={genre}
+                        label={genre}
+                        value={value}
+                        onChange={(newValue) => {
+                            setSliders(prev => ({ ...prev, [genre]: newValue }));
+                        }}
+                    />
+                ))}
+
+                <div className="flex justify-center items-center gap-8 mx-8">
+                    {/* Toggle view all / top 5 */}
+                    {Object.keys(sliders).length > 5 && (
+                        <PrimaryButton
+                            onClick={() => setViewAll(prev => !prev)}
+                            className="mb-4"
+                        >
+                            {viewAll ? "Show Top 5" : "View All"}
+                        </PrimaryButton>
+                    )}
+
+                    {/* Save button */}
+                    <PrimaryButton
+                        onClick={async () => {
+                            const token = localStorage.getItem("token");
+                            try {
+                                const res = await fetch(`${BASE_URL}/sliders`, {
+                                    method: "PUT",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        Authorization: `Bearer ${token}`,
+                                        "X-API-Key": API_KEY
+                                    },
+                                    body: JSON.stringify({ sliders })
+                                });
+                                if (!res.ok) throw new Error("Failed to save sliders");
+                                const data = await res.json();
+
+                                setSliders(data.sliders);
+                                window.scrollTo({ top: 0, behavior: "smooth" });
+                            } catch (err) {
+                                console.error(err);
+                            }
+                        }}
+                    >
+                        Save Preferences
+                    </PrimaryButton>
+                </div>
             </section>
 
+            {/* --- Blacklist section blijft hetzelfde --- */}
             <section className="m-4">
-
                 <div className="flex w-full items-center gap-4">
                     <div className="basis-2/3">
                         <p className="text-xl text-text-primary font-bold mb-2">Blacklist</p>
@@ -118,7 +174,6 @@ function Preferences() {
                             Excluded from recommendations
                         </p>
                     </div>
-
                     <div className="basis-1/3">
                         <PrimaryButton>View all</PrimaryButton>
                     </div>
@@ -144,9 +199,7 @@ function Preferences() {
                     <div
                         className="flex transition-transform duration-300"
                         style={{
-                            transform: `translateX(-${
-                                tabs.findIndex(t => t.key === activeTab) * 100
-                            }%)`
+                            transform: `translateX(-${tabs.findIndex(t => t.key === activeTab) * 100}%)`
                         }}
                     >
                         {tabs.map(tab => (
@@ -154,8 +207,7 @@ function Preferences() {
                                 key={tab.key}
                                 className="relative min-w-full space-y-2 p-6 bg-tertiary rounded-xl pb-16 min-h-48"
                             >
-
-                                {lists[tab.key]?.slice(0,5).map((item) => (
+                                {lists[tab.key]?.slice(0, 5).map((item) => (
                                     <li
                                         key={item._id}
                                         className="p-2 bg-text-primary rounded shadow flex justify-between items-center"
@@ -170,22 +222,17 @@ function Preferences() {
                                         </button>
                                     </li>
                                 ))}
-
                                 <button
                                     onClick={async () => {
                                         const value = prompt("Add item");
                                         if (!value) return;
 
-                                        //Fetch request for POSTing new item in blacklist per user
+                                        const newItem = {
+                                            type: activeTab === "songs" ? "track" : activeTab.slice(0, -1),
+                                            value: value
+                                        };
+
                                         try {
-                                            const value = prompt("Add item");
-                                            if (!value) return;
-
-                                            const newItem = {
-                                                type: activeTab === "songs" ? "track" : activeTab.slice(0, -1),
-                                                value: value
-                                            };
-
                                             const response = await fetch(`${BASE_URL}/blacklist`, {
                                                 method: "POST",
                                                 headers: {
@@ -195,16 +242,14 @@ function Preferences() {
                                                 },
                                                 body: JSON.stringify(newItem)
                                             });
-
                                             const data = await response.json();
-                                            if (!response.ok) throw new Error(data.message || "Failed to add");
-                                            
+                                            if (!response.ok) throw new Error("Failed to add");
+
                                             setLists({
                                                 genres: data.entries.filter(e => e.type === "genre"),
                                                 artists: data.entries.filter(e => e.type === "artist"),
                                                 songs: data.entries.filter(e => e.type === "track")
                                             });
-
                                         } catch (err) {
                                             console.error("Error adding item", err);
                                         }
