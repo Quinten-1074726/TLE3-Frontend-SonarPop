@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MdClose, MdEdit } from "react-icons/md";
+
 import Search from "../components/Search";
 import PrimaryButton from "../components/PrimaryButton.jsx";
 import Slider from "../components/Slider.jsx";
@@ -8,11 +9,12 @@ import { useNav } from "../components/ui/NavContext.jsx";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import MusicPlayer from "../components/MusicPlayer.jsx";
 import SongCarousel from "../components/Cards & Carousels/SongCarousel.jsx";
+import GenreCarousel from "../components/Cards & Carousels/GenreCarousel.jsx";
 import RandomSongCard from "../components/RandomSongCard.jsx";
 
 export default function Home() {
-  // Check if user is logged in
   const navigate = useNavigate();
+
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -86,6 +88,45 @@ export default function Home() {
   const [sliderValue, setSliderValue] = useState(0);
 
   const toggleConfig = () => setShowConfig((prev) => !prev);
+
+  const dummyCards = [
+    {
+      id: "home-song-1",
+      name: "Dromen in Kleur",
+      artist: "Suzan & Freek",
+      image: "https://placehold.co/300x300?text=Dromen+in+Kleur",
+    },
+    {
+      id: "home-song-2",
+      name: "Blauwe Dag",
+      artist: "Suzan & Freek",
+      image: "https://placehold.co/300x300?text=Blauwe+Dag",
+    },
+    {
+      id: "home-song-3",
+      name: "Brabant",
+      artist: "Guus Meeuwis",
+      image: "https://placehold.co/300x300?text=Brabant",
+    },
+  ];
+
+  const dummyGenres = [
+    {
+      id: "genre-1",
+      name: "Nederpop",
+      image: "https://placehold.co/300x300?text=Nederpop",
+    },
+    {
+      id: "genre-2",
+      name: "Rock",
+      image: "https://placehold.co/300x300?text=Rock",
+    },
+    {
+      id: "genre-3",
+      name: "Hip Hop",
+      image: "https://placehold.co/300x300?text=Hip+Hop",
+    },
+  ];
 
   return (
     <div className="space-y-6 min-h-screen bg-background text-text-primary pb-28">
