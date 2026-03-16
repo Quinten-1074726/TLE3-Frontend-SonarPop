@@ -11,7 +11,7 @@ import MusicPlayer from "../components/MusicPlayer.jsx";
 import SongCarousel from "../components/Cards & Carousels/SongCarousel.jsx";
 import GenreCarousel from "../components/Cards & Carousels/GenreCarousel.jsx";
 import RandomSongCard from "../components/RandomSongCard.jsx";
-
+//comment
 export default function Home() {
   const navigate = useNavigate();
 
