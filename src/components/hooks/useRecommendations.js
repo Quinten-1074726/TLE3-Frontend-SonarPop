@@ -10,6 +10,24 @@ function useRecommendations() {
     const [artists, setArtists] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    async function fetchArtistImage(name, headers) {
+        try {
+            const res = await fetch(
+                `${BASE_URL}/artists/${encodeURIComponent(name)}/image`,
+                { headers }
+            );
+
+            if (!res.ok) return null;
+
+            const data = await res.json();
+
+            const img = data.images.find((i) => i.size === "small");
+            return img?.url || null;
+        } catch {
+            return null;
+        }
+    }
+
     useEffect(() => {
         async function loadRecommendations() {
             try {
@@ -55,20 +73,23 @@ function useRecommendations() {
 
                 // Getting artists from similarArtists
                 const uniqueArtists = {};
-                mappedTracks.forEach(track => {
-                    track.similarArtists.forEach(artist => {
+
+                for (const track of mappedTracks) {
+                    for (const artist of track.similarArtists) {
                         const artistName = artist.artist;
-                        const artistImage = track.albumImages?.[0]?.url || notFound;
 
                         if (!uniqueArtists[artistName] && Object.keys(uniqueArtists).length < 10) {
+
+                            const image = await fetchArtistImage(artistName, headers);
+
                             uniqueArtists[artistName] = {
                                 id: artist._id || artistName,
                                 name: artistName,
-                                imageUrl: artistImage,
+                                imageUrl: image || notFound,
                             };
                         }
-                    });
-                });
+                    }
+                }
 
                 setArtists(Object.values(uniqueArtists));
 

@@ -5,7 +5,7 @@ function ArtistProfile({ artist }) {
         <>
             <div className="rounded-xl p-4 flex flex-col items-center w-40">
                 <img
-                    src={artist?.avatar || defaultProfile}
+                    src={artist?.imageUrl || defaultProfile}
                     alt={artist?.name || "Unknown"}
                     className="w-28 h-28 rounded-full object-cover"
                 />
