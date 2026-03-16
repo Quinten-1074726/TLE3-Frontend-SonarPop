@@ -2,17 +2,8 @@ import PreferenceSlider from "../components/PreferenceSlider.jsx";
 import {useEffect, useState} from "react";
 import PageHeader from "../components/ui/PageHeader.jsx";
 import PrimaryButton from "../components/PrimaryButton.jsx";
-import {useNavigate} from "react-router";
 
 function Preferences() {
-    //Check if user is logged in
-    const navigate = useNavigate();
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            navigate("/login");
-        }
-    }, [navigate]);
 
     const [hiphop, setHiphop] = useState(50);
     const [pop, setPop] = useState(50);

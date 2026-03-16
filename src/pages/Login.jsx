@@ -1,5 +1,6 @@
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
+import { storeSession } from "../auth/AuthStorage";
 
 function Login() {
     const [username, setUsername] = useState("");
@@ -31,13 +32,7 @@ function Login() {
                 return;
             }
 
-            localStorage.setItem("token", data.token);
-
-            if (data.user) {
-                localStorage.setItem("user", JSON.stringify(data.user));
-            } else {
-                localStorage.setItem("user", JSON.stringify({ username }));
-            }
+            storeSession(data.token, data.user || { username });
 
             if (data.user && !data.user.hasCompletedOnboarding) {
                 navigate("/onboarding");

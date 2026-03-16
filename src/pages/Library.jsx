@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
 import { FiPlus, FiMusic } from "react-icons/fi";
 
 import CreatePlaylistComponent from "../components/CreatePlaylistComponent.jsx";
 import PageHeader from "../components/ui/PageHeader.jsx";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const dummyPlaylists = [
     {
@@ -33,16 +33,7 @@ const dummyPlaylists = [
 ];
 
 function Library() {
-    const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
-
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            navigate("/login");
-        }
-    }, [navigate]);
 
     const openModal = () => setShowModal(true);
     const closeModal = () => setShowModal(false);

@@ -11,7 +11,9 @@ import MusicPlayer from "../components/MusicPlayer.jsx";
 import SongCarousel from "../components/Cards & Carousels/SongCarousel.jsx";
 import GenreCarousel from "../components/Cards & Carousels/GenreCarousel.jsx";
 import RandomSongCard from "../components/RandomSongCard.jsx";
-//comment
+import useRecommendations from "../components/hooks/useRecommendations.js";
+import ArtistCarousel from "../components/Cards & Carousels/ArtistCarousel.jsx";
+
 export default function Home() {
   const navigate = useNavigate();
 
@@ -35,28 +37,9 @@ export default function Home() {
       localStorage.setItem("slider_value", value.toString())
   }
 
-  const toggleConfig = () => setShowConfig((prev) => !prev);
+  const { tracks, artists, loading } = useRecommendations();
 
-  const dummyCards = [
-    {
-      id: "home-song-1",
-      name: "Dromen in Kleur",
-      artist: "Suzan & Freek",
-      image: "https://placehold.co/300x300?text=Dromen+in+Kleur",
-    },
-    {
-      id: "home-song-2",
-      name: "Blauwe Dag",
-      artist: "Suzan & Freek",
-      image: "https://placehold.co/300x300?text=Blauwe+Dag",
-    },
-    {
-      id: "home-song-3",
-      name: "Brabant",
-      artist: "Guus Meeuwis",
-      image: "https://placehold.co/300x300?text=Brabant",
-    },
-  ];
+  const toggleConfig = () => setShowConfig((prev) => !prev);
 
   return (
     <div className="space-y-6 min-h-screen bg-background text-text-primary pb-28">
@@ -101,8 +84,14 @@ export default function Home() {
         </div>
       </div>
 
-      <SongCarousel title="Recently Played" cards={dummyCards} />
-
+      {loading ? (
+          <p className="px-4 text-text-primary/70">Loading recommendations...</p>
+      ) : (
+          <>
+            <SongCarousel title="Songs you might like" cards={tracks} />
+            <ArtistCarousel title="Artists you might like" artists={artists} />
+          </>
+      )}
       <MusicPlayer />
     </div>
   );
