@@ -1,5 +1,6 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { MdClose, MdEdit } from "react-icons/md";
-
 import Search from "../components/Search";
 import PrimaryButton from "../components/PrimaryButton.jsx";
 import Slider from "../components/Slider.jsx";
@@ -8,36 +9,26 @@ import PageHeader from "../components/ui/PageHeader.jsx";
 import MusicPlayer from "../components/MusicPlayer.jsx";
 import SongCarousel from "../components/Cards & Carousels/SongCarousel.jsx";
 import RandomSongCard from "../components/RandomSongCard.jsx";
-import { useState } from "react";
+import useRecommendations from "../components/hooks/useRecommendations.js";
+import ArtistCarousel from "../components/Cards & Carousels/ArtistCarousel.jsx";
 
 export default function Home() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+    }
+  }, [navigate]);
 
   const { isSearchOpen } = useNav();
   const [showConfig, setShowConfig] = useState(false);
   const [sliderValue, setSliderValue] = useState(0);
+  const { tracks, artists, loading } = useRecommendations();
 
   const toggleConfig = () => setShowConfig((prev) => !prev);
-
-  const dummyCards = [
-    {
-      id: "home-song-1",
-      name: "Dromen in Kleur",
-      artist: "Suzan & Freek",
-      image: "https://placehold.co/300x300?text=Dromen+in+Kleur",
-    },
-    {
-      id: "home-song-2",
-      name: "Blauwe Dag",
-      artist: "Suzan & Freek",
-      image: "https://placehold.co/300x300?text=Blauwe+Dag",
-    },
-    {
-      id: "home-song-3",
-      name: "Brabant",
-      artist: "Guus Meeuwis",
-      image: "https://placehold.co/300x300?text=Brabant",
-    },
-  ];
 
   return (
     <div className="space-y-6 min-h-screen bg-background text-text-primary pb-28">
@@ -82,8 +73,14 @@ export default function Home() {
         </div>
       </div>
 
-      <SongCarousel title="Recently Played" cards={dummyCards} />
-
+      {loading ? (
+          <p className="px-4 text-text-primary/70">Loading recommendations...</p>
+      ) : (
+          <>
+            <SongCarousel title="Songs you might like" cards={tracks} />
+            <ArtistCarousel title="Artists you might like" artists={artists} />
+          </>
+      )}
       <MusicPlayer />
     </div>
   );
