@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MdClose, MdEdit } from "react-icons/md";
-
 import Search from "../components/Search";
 import PrimaryButton from "../components/PrimaryButton.jsx";
 import Slider from "../components/Slider.jsx";
@@ -12,8 +11,8 @@ import SongCarousel from "../components/Cards & Carousels/SongCarousel.jsx";
 import RandomSongCard from "../components/RandomSongCard.jsx";
 
 export default function Home() {
+  // Check if user is logged in
   const navigate = useNavigate();
-
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -22,62 +21,71 @@ export default function Home() {
     }
   }, [navigate]);
 
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
+  const API_KEY = import.meta.env.VITE_API_KEY;
+  const [recommendations, setRecommendations] = useState([]);
+
+  useEffect(() => {
+    async function loadRecommendations() {
+      try {
+        const token = localStorage.getItem("token");
+
+        const headers = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          "X-API-Key": API_KEY,
+        };
+
+        // Calculating profile vector
+        const profileRes = await fetch(`${BASE_URL}/profile/compute`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({}),
+        });
+
+        const { vector } = await profileRes.json();
+
+        // Fetching recommendations based on profile vector
+        const recRes = await fetch(`${BASE_URL}/recommendations`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            profileVector: vector,
+            limit: 10,
+            dial: 3,
+          }),
+        });
+
+        if (!recRes.ok) {
+          const text = await recRes.text();
+          console.error("Recommendation error:", text);
+          throw new Error("Recommendation request failed");
+        }
+
+        const data = await recRes.json();
+
+        // Map to SongCard component
+        const mapped = data.tracks.map(({ track }) => ({
+          id: track._id,
+          title: track.title,
+          artist: track.artist,
+          image: track.imageUrl,
+        }));
+
+        setRecommendations(mapped);
+      } catch (err) {
+        console.error("Failed to load recommendations", err);
+      }
+    }
+
+    loadRecommendations();
+  }, []);
+
   const { isSearchOpen } = useNav();
   const [showConfig, setShowConfig] = useState(false);
   const [sliderValue, setSliderValue] = useState(0);
 
   const toggleConfig = () => setShowConfig((prev) => !prev);
-
-  const [recommendedTracks, setRecommendedTracks] = useState([]);
-  const BASE_URL = import.meta.env.VITE_BASE_URL;
-  const API_KEY = import.meta.env.VITE_API_KEY;
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    //Generate recommendations
-    const fetchRecommendations = async () => {
-      try {
-        //Compute profile vector
-        const profileRes = await fetch(`${BASE_URL}/profile/compute`, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "X-API-Key": API_KEY,
-            "Content-Type": "application/json",
-          },
-        });
-        const profileData = await profileRes.json();
-        const profileVector = profileData.vector;
-
-        //Fetch recommendations
-        const recRes = await fetch(`${BASE_URL}/recommendations`, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "X-API-Key": API_KEY,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            profileVector,
-            limit: 8,   // 8 songs
-            dial: 3,    // neutral for now
-          }),
-        });
-
-        const recData = await recRes.json();
-        if (!recRes.ok) throw new Error(recData.message || "Failed to fetch recommendations");
-
-        //Save tracks in state
-        setRecommendedTracks(recData.tracks.map(t => t.track));
-      } catch (err) {
-        console.error("Error fetching recommendations:", err);
-      }
-    };
-
-    fetchRecommendations();
-  }, []);
-
 
   return (
     <div className="space-y-6 min-h-screen bg-background text-text-primary pb-28">
@@ -124,14 +132,8 @@ export default function Home() {
 
       <SongCarousel
           title="You might like"
-          cards={recommendedTracks.map(t => ({
-            id: t._id,
-            title: t.title,
-            artist: t.artist,
-            genreVector: t.genreVector, // optional
-          }))}
+          cards={recommendations}
       />
-
       <MusicPlayer />
     </div>
   );
