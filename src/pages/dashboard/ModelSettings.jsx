@@ -127,9 +127,12 @@ export default function ModelSettings() {
   });
 
   function applyConfigToState(config) {
+    const hybridGenre = normalizePercent(config?.hybridWeights?.genre, 50);
+    const hybridCf = 100 - hybridGenre;
+
     setSettings({
-      hybridGenre: normalizePercent(config?.hybridWeights?.genre, 50),
-      hybridCf: normalizePercent(config?.hybridWeights?.cf, 50),
+      hybridGenre,
+      hybridCf,
 
       feedbackLike: normalizePercent(config?.feedbackMultipliers?.like, 110),
       feedbackDislike: normalizePercent(config?.feedbackMultipliers?.dislike, 50),
@@ -189,6 +192,26 @@ export default function ModelSettings() {
     }));
   }
 
+  function updateHybridGenre(value) {
+    const numericValue = Number(value);
+
+    setSettings((prev) => ({
+      ...prev,
+      hybridGenre: numericValue,
+      hybridCf: 100 - numericValue,
+    }));
+  }
+
+  function updateHybridCf(value) {
+    const numericValue = Number(value);
+
+    setSettings((prev) => ({
+      ...prev,
+      hybridCf: numericValue,
+      hybridGenre: 100 - numericValue,
+    }));
+  }
+
   const radarData = useMemo(() => {
     return {
       labels: ["Genre", "Listeners", "Discovery", "Learning"],
@@ -214,10 +237,13 @@ export default function ModelSettings() {
       setError("");
       setSuccess("");
 
+      const normalizedGenre = settings.hybridGenre / 100;
+      const normalizedCf = 1 - normalizedGenre;
+
       const payload = {
         hybridWeights: {
-          genre: settings.hybridGenre / 100,
-          cf: settings.hybridCf / 100,
+          genre: normalizedGenre,
+          cf: normalizedCf,
         },
         feedbackMultipliers: {
           like: settings.feedbackLike / 100,
@@ -301,13 +327,13 @@ export default function ModelSettings() {
               label="Genre match"
               value={settings.hybridGenre}
               disabled={!configAvailable}
-              onChange={(e) => updateSetting("hybridGenre", e.target.value)}
+              onChange={(e) => updateHybridGenre(e.target.value)}
             />
             <SettingRow
               label="Similar listeners"
               value={settings.hybridCf}
               disabled={!configAvailable}
-              onChange={(e) => updateSetting("hybridCf", e.target.value)}
+              onChange={(e) => updateHybridCf(e.target.value)}
             />
           </div>
         );
