@@ -6,22 +6,49 @@ import {
   resetAdminConfig,
 } from "../../services/admin.js";
 
-function Panel({ title, children }) {
+function Panel({ title, children, right }) {
   return (
     <section className="rounded-2xl border border-white/10 bg-[#181919] p-5">
-      <h2 className="mb-4 text-xl font-semibold text-text-primary">{title}</h2>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="text-xl font-semibold text-text-primary">{title}</h2>
+        {right || null}
+      </div>
       {children}
     </section>
   );
 }
 
-function SettingRow({ label, value, min = 0, max = 100, onChange, disabled = false }) {
+function TabButton({ active, children, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={[
+        "rounded-full border px-4 py-2 text-sm transition",
+        active
+          ? "border-white/20 bg-white/10 text-white"
+          : "border-white/10 text-white/70 hover:bg-white/8 hover:text-white",
+      ].join(" ")}
+    >
+      {children}
+    </button>
+  );
+}
+
+function SettingRow({
+  label,
+  value,
+  min = 0,
+  max = 100,
+  onChange,
+  disabled = false,
+}) {
   return (
     <div className="rounded-xl border border-white/8 bg-white/[0.03] p-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <p className="text-sm font-semibold text-text-primary">{label}</p>
 
-        <div className="w-full lg:w-[260px]">
+        <div className="w-full lg:w-[280px]">
           <input
             type="range"
             min={min}
@@ -38,6 +65,15 @@ function SettingRow({ label, value, min = 0, max = 100, onChange, disabled = fal
   );
 }
 
+function MiniStat({ label, value }) {
+  return (
+    <div className="rounded-xl border border-white/8 bg-white/[0.03] p-4">
+      <p className="text-xs text-white/45">{label}</p>
+      <p className="mt-2 text-base font-semibold text-text-primary">{value}</p>
+    </div>
+  );
+}
+
 function normalizePercent(value, fallback = 50) {
   if (typeof value !== "number" || Number.isNaN(value)) return fallback;
   return Math.round(value * 100);
@@ -48,6 +84,13 @@ function normalizeNumber(value, fallback = 0) {
   return value;
 }
 
+const SECTION_OPTIONS = [
+  { key: "mix", label: "Mix" },
+  { key: "feedback", label: "Feedback" },
+  { key: "similarity", label: "Similarity" },
+  { key: "profile", label: "Profile" },
+];
+
 export default function ModelSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -56,6 +99,8 @@ export default function ModelSettings() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [configAvailable, setConfigAvailable] = useState(false);
+
+  const [activeSection, setActiveSection] = useState("mix");
 
   const [configMeta, setConfigMeta] = useState({
     updatedAt: "",
@@ -123,7 +168,6 @@ export default function ModelSettings() {
         setConfigAvailable(true);
       } catch (err) {
         if (!active) return;
-
         setConfigAvailable(false);
         setError(err.message || "Config kon niet geladen worden.");
       } finally {
@@ -147,7 +191,7 @@ export default function ModelSettings() {
 
   const radarData = useMemo(() => {
     return {
-      labels: ["Genre", "CF", "Discovery", "Learning"],
+      labels: ["Genre", "Listeners", "Discovery", "Learning"],
       values: [
         settings.hybridGenre / 100,
         settings.hybridCf / 100,
@@ -160,7 +204,9 @@ export default function ModelSettings() {
   async function handleSave() {
     if (!configAvailable) return;
 
-    const confirmed = window.confirm("Weet je zeker dat je deze modelinstellingen wilt opslaan?");
+    const confirmed = window.confirm(
+      "Weet je zeker dat je deze modelinstellingen wilt opslaan?"
+    );
     if (!confirmed) return;
 
     try {
@@ -216,7 +262,9 @@ export default function ModelSettings() {
   async function handleReset() {
     if (!configAvailable) return;
 
-    const confirmed = window.confirm("Weet je zeker dat je de modelinstellingen wilt resetten?");
+    const confirmed = window.confirm(
+      "Weet je zeker dat je de modelinstellingen wilt resetten?"
+    );
     if (!confirmed) return;
 
     try {
@@ -241,6 +289,121 @@ export default function ModelSettings() {
       }
     } finally {
       setResetting(false);
+    }
+  }
+
+  function renderSection() {
+    switch (activeSection) {
+      case "mix":
+        return (
+          <div className="space-y-4">
+            <SettingRow
+              label="Genre match"
+              value={settings.hybridGenre}
+              disabled={!configAvailable}
+              onChange={(e) => updateSetting("hybridGenre", e.target.value)}
+            />
+            <SettingRow
+              label="Similar listeners"
+              value={settings.hybridCf}
+              disabled={!configAvailable}
+              onChange={(e) => updateSetting("hybridCf", e.target.value)}
+            />
+          </div>
+        );
+
+      case "feedback":
+        return (
+          <div className="space-y-4">
+            <SettingRow
+              label="Like boost"
+              value={settings.feedbackLike}
+              min={0}
+              max={200}
+              disabled={!configAvailable}
+              onChange={(e) => updateSetting("feedbackLike", e.target.value)}
+            />
+            <SettingRow
+              label="Dislike penalty"
+              value={settings.feedbackDislike}
+              min={0}
+              max={200}
+              disabled={!configAvailable}
+              onChange={(e) => updateSetting("feedbackDislike", e.target.value)}
+            />
+            <SettingRow
+              label="Library boost"
+              value={settings.feedbackLibrary}
+              min={0}
+              max={200}
+              disabled={!configAvailable}
+              onChange={(e) => updateSetting("feedbackLibrary", e.target.value)}
+            />
+            <SettingRow
+              label="Skip penalty"
+              value={settings.feedbackSkip}
+              min={0}
+              max={200}
+              disabled={!configAvailable}
+              onChange={(e) => updateSetting("feedbackSkip", e.target.value)}
+            />
+          </div>
+        );
+
+      case "similarity":
+        return (
+          <div className="space-y-4">
+            <SettingRow
+              label="Track similarity"
+              value={settings.cfTrackWeight}
+              disabled={!configAvailable}
+              onChange={(e) => updateSetting("cfTrackWeight", e.target.value)}
+            />
+            <SettingRow
+              label="Artist similarity"
+              value={settings.cfArtistWeight}
+              disabled={!configAvailable}
+              onChange={(e) => updateSetting("cfArtistWeight", e.target.value)}
+            />
+          </div>
+        );
+
+      case "profile":
+        return (
+          <div className="space-y-4">
+            <SettingRow
+              label="Profile learning"
+              value={settings.learningRate}
+              disabled={!configAvailable}
+              onChange={(e) => updateSetting("learningRate", e.target.value)}
+            />
+            <SettingRow
+              label="Profile shift"
+              value={settings.maxShift}
+              disabled={!configAvailable}
+              onChange={(e) => updateSetting("maxShift", e.target.value)}
+            />
+            <SettingRow
+              label="Play threshold"
+              value={settings.playThreshold}
+              min={0}
+              max={100}
+              disabled={!configAvailable}
+              onChange={(e) => updateSetting("playThreshold", e.target.value)}
+            />
+            <SettingRow
+              label="Decay days"
+              value={settings.halfLifeDays}
+              min={1}
+              max={180}
+              disabled={!configAvailable}
+              onChange={(e) => updateSetting("halfLifeDays", e.target.value)}
+            />
+          </div>
+        );
+
+      default:
+        return null;
     }
   }
 
@@ -281,163 +444,68 @@ export default function ModelSettings() {
       ) : null}
 
       <section className="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-2xl border border-white/10 bg-[#181919] p-5">
-          <p className="text-sm text-white/60">Genre weight</p>
-          <p className="mt-3 text-3xl font-bold text-text-primary">
-            {configAvailable ? settings.hybridGenre : "—"}
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-white/10 bg-[#181919] p-5">
-          <p className="text-sm text-white/60">CF weight</p>
-          <p className="mt-3 text-3xl font-bold text-text-primary">
-            {configAvailable ? settings.hybridCf : "—"}
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-white/10 bg-[#181919] p-5">
-          <p className="text-sm text-white/60">Updated at</p>
-          <p className="mt-3 text-sm font-semibold text-text-primary">
-            {configAvailable && configMeta.updatedAt
+        <MiniStat label="Genre match" value={configAvailable ? settings.hybridGenre : "—"} />
+        <MiniStat label="Similar listeners" value={configAvailable ? settings.hybridCf : "—"} />
+        <MiniStat
+          label="Updated at"
+          value={
+            configAvailable && configMeta.updatedAt
               ? new Date(configMeta.updatedAt).toLocaleString()
-              : "—"}
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-white/10 bg-[#181919] p-5">
-          <p className="text-sm text-white/60">Updated by</p>
-          <p className="mt-3 text-sm font-semibold text-text-primary">
-            {configAvailable ? configMeta.updatedBy || "—" : "—"}
-          </p>
-        </div>
+              : "—"
+          }
+        />
+        <MiniStat label="Updated by" value={configAvailable ? configMeta.updatedBy || "—" : "—"} />
       </section>
 
-      <section className="mb-6 grid gap-4 xl:grid-cols-[1.35fr_1fr]">
-        <Panel title="Tuning">
-          <div className="space-y-4">
-            <SettingRow
-              label="Hybrid genre"
-              value={settings.hybridGenre}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("hybridGenre", e.target.value)}
-            />
-
-            <SettingRow
-              label="Hybrid CF"
-              value={settings.hybridCf}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("hybridCf", e.target.value)}
-            />
-
-            <SettingRow
-              label="Like multiplier"
-              value={settings.feedbackLike}
-              min={0}
-              max={200}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("feedbackLike", e.target.value)}
-            />
-
-            <SettingRow
-              label="Dislike multiplier"
-              value={settings.feedbackDislike}
-              min={0}
-              max={200}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("feedbackDislike", e.target.value)}
-            />
-
-            <SettingRow
-              label="Library multiplier"
-              value={settings.feedbackLibrary}
-              min={0}
-              max={200}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("feedbackLibrary", e.target.value)}
-            />
-
-            <SettingRow
-              label="Skip multiplier"
-              value={settings.feedbackSkip}
-              min={0}
-              max={200}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("feedbackSkip", e.target.value)}
-            />
-
-            <SettingRow
-              label="CF track weight"
-              value={settings.cfTrackWeight}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("cfTrackWeight", e.target.value)}
-            />
-
-            <SettingRow
-              label="CF artist weight"
-              value={settings.cfArtistWeight}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("cfArtistWeight", e.target.value)}
-            />
-
-            <SettingRow
-              label="Learning rate"
-              value={settings.learningRate}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("learningRate", e.target.value)}
-            />
-
-            <SettingRow
-              label="Max shift"
-              value={settings.maxShift}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("maxShift", e.target.value)}
-            />
-
-            <SettingRow
-              label="Play threshold"
-              value={settings.playThreshold}
-              min={0}
-              max={100}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("playThreshold", e.target.value)}
-            />
-
-            <SettingRow
-              label="Half life days"
-              value={settings.halfLifeDays}
-              min={1}
-              max={180}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("halfLifeDays", e.target.value)}
-            />
-          </div>
+      <section className="grid gap-4 xl:grid-cols-[1.2fr_380px]">
+        <Panel
+          title="Tuning"
+          right={
+            <div className="flex flex-wrap gap-2">
+              {SECTION_OPTIONS.map((section) => (
+                <TabButton
+                  key={section.key}
+                  active={activeSection === section.key}
+                  onClick={() => setActiveSection(section.key)}
+                >
+                  {section.label}
+                </TabButton>
+              ))}
+            </div>
+          }
+        >
+          {renderSection()}
         </Panel>
 
-        <Panel title="Model profile">
-          <RadarChart
-            labels={radarData.labels}
-            values={radarData.values}
-            chartLabel="Model profile"
-          />
-        </Panel>
-      </section>
+        <div className="space-y-4">
+          <Panel title="Model profile">
+            <RadarChart
+              labels={radarData.labels}
+              values={radarData.values}
+              chartLabel="Model profile"
+            />
+          </Panel>
 
-      <section className="flex flex-col gap-3 sm:flex-row">
-        <button
-          onClick={handleSave}
-          disabled={saving || !configAvailable}
-          className="rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {saving ? "Opslaan..." : "Wijzigingen opslaan"}
-        </button>
+          <Panel title="Actions">
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleSave}
+                disabled={saving || !configAvailable}
+                className="rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {saving ? "Opslaan..." : "Wijzigingen opslaan"}
+              </button>
 
-        <button
-          onClick={handleReset}
-          disabled={resetting || !configAvailable}
-          className="rounded-xl border border-white/10 px-4 py-3 text-sm text-white/80 transition hover:bg-white/8 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {resetting ? "Resetten..." : "Reset"}
-        </button>
+              <button
+                onClick={handleReset}
+                disabled={resetting || !configAvailable}
+                className="rounded-xl border border-white/10 px-4 py-3 text-sm text-white/80 transition hover:bg-white/8 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {resetting ? "Resetten..." : "Reset"}
+              </button>
+            </div>
+          </Panel>
+        </div>
       </section>
     </div>
   );
