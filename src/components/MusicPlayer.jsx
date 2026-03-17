@@ -11,8 +11,12 @@ import {
 } from "lucide-react";
 
 function MusicPlayer() {
+    const BASE_URL = import.meta.env.VITE_BASE_URL;
+    const API_KEY = import.meta.env.VITE_API_KEY;
+
     const tracks = [
         {
+            _id: "track-1",
             title: "Goud",
             author: "Susanne & Freek",
             album: "Dromen in kleur",
@@ -21,6 +25,7 @@ function MusicPlayer() {
                 "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&h=500&auto=format&fit=crop",
         },
         {
+            _id: "track-2",
             title: "Lichtje Branden",
             author: "Susanne & Freek",
             album: "Dromen in kleur",
@@ -80,6 +85,46 @@ function MusicPlayer() {
             audio.removeEventListener("ended", forward);
         };
     }, [currentTrackIndex, isPlaying]);
+
+    //LIKE FEATURE
+    const [liked, setLiked] = useState(false);
+
+    //IF ALREADY LIKED -> SHOW LIKED TOGGLE
+    const handleLike = async () => {
+        try {
+            if (liked) {
+                await fetch(`${BASE_URL}/api/v1/feedback/${currentTrack._id}`, {
+                    method: "DELETE",
+                    headers: {
+                        "X-API-Key": API_KEY
+                    }
+                });
+                setLiked(false);
+            } //IF NOT LIKED -> SHOW ABILITY TO LIKE
+            else {
+                await fetch(`${BASE_URL}/api/v1/feedback`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-API-Key": API_KEY
+                    },
+                    body: JSON.stringify({
+                        trackId: currentTrack._id,
+                        action: "like"
+                    })
+                });
+                setLiked(true);
+            }
+
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    //RESET LIKE BUTTON ON NEW SONG
+    useEffect(() => {
+        setLiked(false);
+    }, [currentTrackIndex]);
 
     return (
         <div
@@ -202,7 +247,12 @@ function MusicPlayer() {
                             </div>
 
                             <div className="flex gap-4 mb-2">
-                                <Heart className="text-white opacity-40 hover:opacity-100 transition-opacity" />
+                                <button onClick={handleLike}>
+                                    <Heart className={`transition-opacity ${
+                                            liked ? "text-red-500 fill-red-500 opacity-100" : "text-white opacity-40 hover:opacity-100"
+                                        }`
+                                    }/>
+                                </button>
                                 <Info className="text-white opacity-40 hover:opacity-100 transition-opacity" />
                             </div>
                         </div>
