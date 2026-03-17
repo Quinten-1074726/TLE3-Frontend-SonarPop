@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import RadarChart from "../../components/charts/RadarChart.jsx";
+import DashboardMiniStat from "../../components/dashboard/DashboardMiniStat.jsx";
+import DashboardPanel from "../../components/dashboard/DashboardPanel.jsx";
+import DashboardSettingRow from "../../components/dashboard/DashboardSettingRow.jsx";
+import DashboardTabButton from "../../components/dashboard/DashboardTabButton.jsx";
 import {
   getAdminConfig,
   updateAdminConfig,
@@ -7,73 +11,54 @@ import {
 } from "../../services/admin.js";
 import { addActivityLogItem } from "../../services/activityLog.js";
 
-function Panel({ title, children, right }) {
-  return (
-    <section className="rounded-2xl border border-white/10 bg-[#181919] p-5">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="text-xl font-semibold text-text-primary">{title}</h2>
-        {right || null}
-      </div>
-      {children}
-    </section>
-  );
-}
+const SECTION_OPTIONS = [
+  { key: "mix", label: "Mix" },
+  { key: "feedback", label: "Feedback" },
+  { key: "similarity", label: "Similarity" },
+  { key: "profile", label: "Profile" },
+];
 
-function TabButton({ active, children, onClick }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={[
-        "rounded-full border px-4 py-2 text-sm transition",
-        active
-          ? "border-white/20 bg-white/10 text-white"
-          : "border-white/10 text-white/70 hover:bg-white/8 hover:text-white",
-      ].join(" ")}
-    >
-      {children}
-    </button>
-  );
-}
+const SECTION_FIELDS = {
+  mix: [
+    { key: "hybridGenre", label: "Genre match", type: "hybridGenre" },
+    { key: "hybridCf", label: "Similar listeners", type: "hybridCf" },
+  ],
+  feedback: [
+    { key: "feedbackLike", label: "Like boost", min: 0, max: 200 },
+    { key: "feedbackDislike", label: "Dislike penalty", min: 0, max: 200 },
+    { key: "feedbackLibrary", label: "Library boost", min: 0, max: 200 },
+    { key: "feedbackSkip", label: "Skip penalty", min: 0, max: 200 },
+  ],
+  similarity: [
+    { key: "cfTrackWeight", label: "Track similarity" },
+    { key: "cfArtistWeight", label: "Artist similarity" },
+  ],
+  profile: [
+    { key: "profileLike", label: "Like adaptation" },
+    { key: "profileLibrary", label: "Library adaptation" },
+    { key: "profileDislike", label: "Dislike adaptation" },
+    { key: "profileSkip", label: "Skip adaptation" },
+    { key: "playThreshold", label: "Play threshold", min: 0, max: 200 },
+    { key: "halfLifeDays", label: "Decay days", min: 1, max: 365 },
+  ],
+};
 
-function SettingRow({
-  label,
-  value,
-  min = 0,
-  max = 100,
-  onChange,
-  disabled = false,
-}) {
-  return (
-    <div className="rounded-xl border border-white/8 bg-white/[0.03] p-4">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <p className="text-sm font-semibold text-text-primary">{label}</p>
-
-        <div className="w-full lg:w-[280px]">
-          <input
-            type="range"
-            min={min}
-            max={max}
-            value={value}
-            onChange={onChange}
-            disabled={disabled}
-            className="w-full accent-white disabled:opacity-40"
-          />
-          <p className="mt-2 text-right text-xs text-white/45">{value}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MiniStat({ label, value }) {
-  return (
-    <div className="rounded-xl border border-white/8 bg-white/[0.03] p-4">
-      <p className="text-xs text-white/45">{label}</p>
-      <p className="mt-2 text-base font-semibold text-text-primary">{value}</p>
-    </div>
-  );
-}
+const DEFAULT_SETTINGS = {
+  hybridGenre: 50,
+  hybridCf: 50,
+  feedbackLike: 130,
+  feedbackDislike: 112,
+  feedbackLibrary: 147,
+  feedbackSkip: 153,
+  cfTrackWeight: 70,
+  cfArtistWeight: 30,
+  profileLike: 10,
+  profileLibrary: 15,
+  profileDislike: 15,
+  profileSkip: 5,
+  playThreshold: 65,
+  halfLifeDays: 122,
+};
 
 function normalizePercent(value, fallback = 50) {
   if (typeof value !== "number" || Number.isNaN(value)) return fallback;
@@ -99,12 +84,37 @@ function getSafeHybridValues(config) {
   };
 }
 
-const SECTION_OPTIONS = [
-  { key: "mix", label: "Mix" },
-  { key: "feedback", label: "Feedback" },
-  { key: "similarity", label: "Similarity" },
-  { key: "profile", label: "Profile" },
-];
+function buildPayload(settings) {
+  const normalizedGenre = settings.hybridGenre / 100;
+  const normalizedCf = 1 - normalizedGenre;
+
+  return {
+    hybridWeights: {
+      genre: normalizedGenre,
+      cf: normalizedCf,
+    },
+    feedbackMultipliers: {
+      like: settings.feedbackLike / 100,
+      dislike: settings.feedbackDislike / 100,
+      library: settings.feedbackLibrary / 100,
+      skip: settings.feedbackSkip / 100,
+    },
+    cfWeights: {
+      track: settings.cfTrackWeight / 100,
+      artist: settings.cfArtistWeight / 100,
+    },
+    profileEvolution: {
+      like: settings.profileLike / 100,
+      library: settings.profileLibrary / 100,
+      dislike: -(settings.profileDislike / 100),
+      skip: -(settings.profileSkip / 100),
+    },
+    playCount: {
+      threshold: settings.playThreshold,
+      halfLifeDays: settings.halfLifeDays,
+    },
+  };
+}
 
 export default function ModelSettings() {
   const [loading, setLoading] = useState(true);
@@ -114,7 +124,6 @@ export default function ModelSettings() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [configAvailable, setConfigAvailable] = useState(false);
-
   const [activeSection, setActiveSection] = useState("mix");
 
   const [configMeta, setConfigMeta] = useState({
@@ -122,24 +131,7 @@ export default function ModelSettings() {
     updatedBy: "",
   });
 
-  const [settings, setSettings] = useState({
-    hybridGenre: 50,
-    hybridCf: 50,
-
-    feedbackLike: 110,
-    feedbackDislike: 50,
-    feedbackLibrary: 120,
-    feedbackSkip: 90,
-
-    cfTrackWeight: 70,
-    cfArtistWeight: 30,
-
-    learningRate: 10,
-    maxShift: 30,
-
-    playThreshold: 10,
-    halfLifeDays: 30,
-  });
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
 
   function applyConfigToState(config) {
     const safeHybrid = getSafeHybridValues(config);
@@ -148,19 +140,31 @@ export default function ModelSettings() {
       hybridGenre: safeHybrid.genre,
       hybridCf: safeHybrid.cf,
 
-      feedbackLike: normalizePercent(config?.feedbackMultipliers?.like, 110),
-      feedbackDislike: normalizePercent(config?.feedbackMultipliers?.dislike, 50),
-      feedbackLibrary: normalizePercent(config?.feedbackMultipliers?.library, 120),
-      feedbackSkip: normalizePercent(config?.feedbackMultipliers?.skip, 90),
+      feedbackLike: normalizePercent(config?.feedbackMultipliers?.like, 130),
+      feedbackDislike: normalizePercent(config?.feedbackMultipliers?.dislike, 112),
+      feedbackLibrary: normalizePercent(config?.feedbackMultipliers?.library, 147),
+      feedbackSkip: normalizePercent(config?.feedbackMultipliers?.skip, 153),
 
-      cfTrackWeight: normalizePercent(config?.cfWeights?.trackWeight, 70),
-      cfArtistWeight: normalizePercent(config?.cfWeights?.artistWeight, 30),
+      cfTrackWeight: normalizePercent(
+        config?.cfWeights?.trackWeight ?? config?.cfWeights?.track,
+        70
+      ),
+      cfArtistWeight: normalizePercent(
+        config?.cfWeights?.artistWeight ?? config?.cfWeights?.artist,
+        30
+      ),
 
-      learningRate: normalizePercent(config?.profileEvolution?.learningRate, 10),
-      maxShift: normalizePercent(config?.profileEvolution?.maxShift, 30),
+      profileLike: normalizePercent(config?.profileEvolution?.like, 10),
+      profileLibrary: normalizePercent(config?.profileEvolution?.library, 15),
+      profileDislike: Math.abs(
+        normalizePercent(config?.profileEvolution?.dislike, -15)
+      ),
+      profileSkip: Math.abs(
+        normalizePercent(config?.profileEvolution?.skip, -5)
+      ),
 
-      playThreshold: normalizeNumber(config?.playCount?.threshold, 10),
-      halfLifeDays: normalizeNumber(config?.playCount?.halfLifeDays, 30),
+      playThreshold: normalizeNumber(config?.playCount?.threshold, 65),
+      halfLifeDays: normalizeNumber(config?.playCount?.halfLifeDays, 122),
     });
 
     setConfigMeta({
@@ -236,14 +240,48 @@ export default function ModelSettings() {
     }));
   }
 
+  function renderSection() {
+    const fields = SECTION_FIELDS[activeSection] || [];
+
+    return (
+      <div className="space-y-4">
+        {fields.map((field) => {
+          let onChange;
+
+          if (field.type === "hybridGenre") {
+            onChange = (e) => updateHybridGenre(e.target.value);
+          } else if (field.type === "hybridCf") {
+            onChange = (e) => updateHybridCf(e.target.value);
+          } else {
+            onChange = (e) => updateSetting(field.key, e.target.value);
+          }
+
+          return (
+            <DashboardSettingRow
+              key={field.key}
+              label={field.label}
+              value={settings[field.key]}
+              min={field.min ?? 0}
+              max={field.max ?? 100}
+              disabled={!configAvailable}
+              onChange={onChange}
+            />
+          );
+        })}
+      </div>
+    );
+  }
+
   const radarData = useMemo(() => {
     return {
-      labels: ["Genre", "Listeners", "Discovery", "Learning"],
+      labels: ["Genre", "Listeners", "Library", "Track", "Artist", "Profile"],
       values: [
         settings.hybridGenre / 100,
         settings.hybridCf / 100,
         settings.feedbackLibrary / 200,
-        settings.learningRate / 100,
+        settings.cfTrackWeight / 100,
+        settings.cfArtistWeight / 100,
+        settings.profileLibrary / 100,
       ],
     };
   }, [settings]);
@@ -261,43 +299,18 @@ export default function ModelSettings() {
       setError("");
       setSuccess("");
 
-      const normalizedGenre = settings.hybridGenre / 100;
-      const normalizedCf = 1 - normalizedGenre;
-
-      const payload = {
-        hybridWeights: {
-          genre: normalizedGenre,
-          cf: normalizedCf,
-        },
-        feedbackMultipliers: {
-          like: settings.feedbackLike / 100,
-          dislike: settings.feedbackDislike / 100,
-          library: settings.feedbackLibrary / 100,
-          skip: settings.feedbackSkip / 100,
-        },
-        cfWeights: {
-          trackWeight: settings.cfTrackWeight / 100,
-          artistWeight: settings.cfArtistWeight / 100,
-        },
-        profileEvolution: {
-          learningRate: settings.learningRate / 100,
-          maxShift: settings.maxShift / 100,
-        },
-        playCount: {
-          threshold: settings.playThreshold,
-          halfLifeDays: settings.halfLifeDays,
-        },
-      };
-
+      const payload = buildPayload(settings);
       const updated = await updateAdminConfig(payload);
+
       applyConfigToState(updated);
       setSuccess("Modelinstellingen opgeslagen.");
+
       addActivityLogItem({
         type: "success",
         title: "Modelinstellingen opgeslagen",
         description: "Een admin heeft recommendation tuning aangepast en opgeslagen.",
         source: "model-settings",
-        });
+      });
     } catch (err) {
       const message = String(err?.message || "").toLowerCase();
 
@@ -306,7 +319,7 @@ export default function ModelSettings() {
         message.includes("networkerror") ||
         message.includes("load failed")
       ) {
-        setError("Opslaan mislukt: PATCH wordt momenteel door de backend/CORS geblokkeerd.");
+        setError("Opslaan mislukt: request naar backend is mislukt.");
       } else {
         setError(err.message || "Opslaan mislukt.");
       }
@@ -331,6 +344,7 @@ export default function ModelSettings() {
       const resetConfig = await resetAdminConfig();
       applyConfigToState(resetConfig);
       setSuccess("Modelinstellingen teruggezet naar defaults.");
+
       addActivityLogItem({
         type: "warning",
         title: "Modelinstellingen gereset",
@@ -345,127 +359,12 @@ export default function ModelSettings() {
         message.includes("networkerror") ||
         message.includes("load failed")
       ) {
-        setError("Reset mislukt: request wordt momenteel door de backend/CORS geblokkeerd.");
+        setError("Reset mislukt: request naar backend is mislukt.");
       } else {
         setError(err.message || "Reset mislukt.");
       }
     } finally {
       setResetting(false);
-    }
-  }
-
-  function renderSection() {
-    switch (activeSection) {
-      case "mix":
-        return (
-          <div className="space-y-4">
-            <SettingRow
-              label="Genre match"
-              value={settings.hybridGenre}
-              disabled={!configAvailable}
-              onChange={(e) => updateHybridGenre(e.target.value)}
-            />
-            <SettingRow
-              label="Similar listeners"
-              value={settings.hybridCf}
-              disabled={!configAvailable}
-              onChange={(e) => updateHybridCf(e.target.value)}
-            />
-          </div>
-        );
-
-      case "feedback":
-        return (
-          <div className="space-y-4">
-            <SettingRow
-              label="Like boost"
-              value={settings.feedbackLike}
-              min={0}
-              max={200}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("feedbackLike", e.target.value)}
-            />
-            <SettingRow
-              label="Dislike penalty"
-              value={settings.feedbackDislike}
-              min={0}
-              max={200}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("feedbackDislike", e.target.value)}
-            />
-            <SettingRow
-              label="Library boost"
-              value={settings.feedbackLibrary}
-              min={0}
-              max={200}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("feedbackLibrary", e.target.value)}
-            />
-            <SettingRow
-              label="Skip penalty"
-              value={settings.feedbackSkip}
-              min={0}
-              max={200}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("feedbackSkip", e.target.value)}
-            />
-          </div>
-        );
-
-      case "similarity":
-        return (
-          <div className="space-y-4">
-            <SettingRow
-              label="Track similarity"
-              value={settings.cfTrackWeight}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("cfTrackWeight", e.target.value)}
-            />
-            <SettingRow
-              label="Artist similarity"
-              value={settings.cfArtistWeight}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("cfArtistWeight", e.target.value)}
-            />
-          </div>
-        );
-
-      case "profile":
-        return (
-          <div className="space-y-4">
-            <SettingRow
-              label="Profile learning"
-              value={settings.learningRate}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("learningRate", e.target.value)}
-            />
-            <SettingRow
-              label="Profile shift"
-              value={settings.maxShift}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("maxShift", e.target.value)}
-            />
-            <SettingRow
-              label="Play threshold"
-              value={settings.playThreshold}
-              min={0}
-              max={100}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("playThreshold", e.target.value)}
-            />
-            <SettingRow
-              label="Decay days"
-              value={settings.halfLifeDays}
-              min={1}
-              max={180}
-              disabled={!configAvailable}
-              onChange={(e) => updateSetting("halfLifeDays", e.target.value)}
-            />
-          </div>
-        );
-
-      default:
-        return null;
     }
   }
 
@@ -515,9 +414,15 @@ export default function ModelSettings() {
       ) : null}
 
       <section className="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MiniStat label="Genre match" value={configAvailable ? settings.hybridGenre : "—"} />
-        <MiniStat label="Similar listeners" value={configAvailable ? settings.hybridCf : "—"} />
-        <MiniStat
+        <DashboardMiniStat
+          label="Genre match"
+          value={configAvailable ? settings.hybridGenre : "—"}
+        />
+        <DashboardMiniStat
+          label="Similar listeners"
+          value={configAvailable ? settings.hybridCf : "—"}
+        />
+        <DashboardMiniStat
           label="Updated at"
           value={
             configAvailable && configMeta.updatedAt
@@ -525,42 +430,42 @@ export default function ModelSettings() {
               : "—"
           }
         />
-        <MiniStat
+        <DashboardMiniStat
           label="Updated by"
           value={configAvailable ? configMeta.updatedBy || "—" : "—"}
         />
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.2fr_380px]">
-        <Panel
+        <DashboardPanel
           title="Tuning"
           right={
             <div className="flex flex-wrap gap-2">
               {SECTION_OPTIONS.map((section) => (
-                <TabButton
+                <DashboardTabButton
                   key={section.key}
                   active={activeSection === section.key}
                   onClick={() => setActiveSection(section.key)}
                 >
                   {section.label}
-                </TabButton>
+                </DashboardTabButton>
               ))}
             </div>
           }
         >
           {renderSection()}
-        </Panel>
+        </DashboardPanel>
 
         <div className="space-y-4">
-          <Panel title="Model profile">
+          <DashboardPanel title="Model profile">
             <RadarChart
               labels={radarData.labels}
               values={radarData.values}
               chartLabel="Model profile"
             />
-          </Panel>
+          </DashboardPanel>
 
-          <Panel title="Actions">
+          <DashboardPanel title="Actions">
             <div className="flex flex-col gap-3">
               <button
                 onClick={handleSave}
@@ -578,7 +483,7 @@ export default function ModelSettings() {
                 {resetting ? "Resetten..." : "Reset"}
               </button>
             </div>
-          </Panel>
+          </DashboardPanel>
         </div>
       </section>
     </div>
