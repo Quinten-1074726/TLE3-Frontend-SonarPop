@@ -25,6 +25,7 @@ import DashboardLayout from "./components/ui/DashboardLayout.jsx";
 
 import ProtectedRoute from "./auth/ProtectedRoute.jsx";
 import RoleRoute from "./auth/RoleRoute.jsx";
+import HomeRedirect from "./auth/HomeRedirect.jsx";
 
 const router = createBrowserRouter([
   {
@@ -50,7 +51,7 @@ const router = createBrowserRouter([
         children: [
           {
             path: "/",
-            element: <Home />,
+            element: <HomeRedirect />,
           },
           {
             path: "/statistics",

@@ -58,7 +58,7 @@ function DashboardLayout() {
         <aside className="border-r border-white/10 bg-[#0d1117] p-6">
           <div className="mb-8">
             <p className="text-xs uppercase tracking-[0.2em] text-white/40">
-              SonarPoppy
+              SonarPop
             </p>
 
             <h1 className="mt-2 text-2xl font-bold">Dashboard</h1>

@@ -198,7 +198,7 @@ export default function DashboardHome() {
     <div className="min-h-screen bg-[#111315] text-text-primary">
       <header className="mb-8">
         <p className="text-xs uppercase tracking-[0.2em] text-white/45">
-          SonarPoppy {role} dashboard
+          SonarPop {role} dashboard
         </p>
         <h1 className="mt-2 text-4xl font-bold">Overview</h1>
         <p className="mt-3 text-sm text-white/60">
