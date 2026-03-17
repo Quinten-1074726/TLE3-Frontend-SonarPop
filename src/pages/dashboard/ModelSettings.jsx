@@ -5,6 +5,7 @@ import {
   updateAdminConfig,
   resetAdminConfig,
 } from "../../services/admin.js";
+import { addActivityLogItem } from "../../services/activityLog.js";
 
 function Panel({ title, children, right }) {
   return (
@@ -84,6 +85,20 @@ function normalizeNumber(value, fallback = 0) {
   return value;
 }
 
+function getSafeHybridValues(config) {
+  const genre = normalizePercent(config?.hybridWeights?.genre, 50);
+  const cf = normalizePercent(config?.hybridWeights?.cf, 50);
+
+  if (genre + cf === 100) {
+    return { genre, cf };
+  }
+
+  return {
+    genre,
+    cf: 100 - genre,
+  };
+}
+
 const SECTION_OPTIONS = [
   { key: "mix", label: "Mix" },
   { key: "feedback", label: "Feedback" },
@@ -127,12 +142,11 @@ export default function ModelSettings() {
   });
 
   function applyConfigToState(config) {
-    const hybridGenre = normalizePercent(config?.hybridWeights?.genre, 50);
-    const hybridCf = 100 - hybridGenre;
+    const safeHybrid = getSafeHybridValues(config);
 
     setSettings({
-      hybridGenre,
-      hybridCf,
+      hybridGenre: safeHybrid.genre,
+      hybridCf: safeHybrid.cf,
 
       feedbackLike: normalizePercent(config?.feedbackMultipliers?.like, 110),
       feedbackDislike: normalizePercent(config?.feedbackMultipliers?.dislike, 50),
@@ -184,6 +198,16 @@ export default function ModelSettings() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!success) return;
+
+    const timer = window.setTimeout(() => {
+      setSuccess("");
+    }, 3500);
+
+    return () => window.clearTimeout(timer);
+  }, [success]);
 
   function updateSetting(key, value) {
     setSettings((prev) => ({
@@ -268,6 +292,12 @@ export default function ModelSettings() {
       const updated = await updateAdminConfig(payload);
       applyConfigToState(updated);
       setSuccess("Modelinstellingen opgeslagen.");
+      addActivityLogItem({
+        type: "success",
+        title: "Modelinstellingen opgeslagen",
+        description: "Een admin heeft recommendation tuning aangepast en opgeslagen.",
+        source: "model-settings",
+        });
     } catch (err) {
       const message = String(err?.message || "").toLowerCase();
 
@@ -301,6 +331,12 @@ export default function ModelSettings() {
       const resetConfig = await resetAdminConfig();
       applyConfigToState(resetConfig);
       setSuccess("Modelinstellingen teruggezet naar defaults.");
+      addActivityLogItem({
+        type: "warning",
+        title: "Modelinstellingen gereset",
+        description: "Een admin heeft de recommendation tuning teruggezet naar defaults.",
+        source: "model-settings",
+      });
     } catch (err) {
       const message = String(err?.message || "").toLowerCase();
 
@@ -458,8 +494,17 @@ export default function ModelSettings() {
       ) : null}
 
       {success ? (
-        <div className="mb-4 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-4 text-sm text-emerald-300">
-          {success}
+        <div className="mb-4 flex items-start justify-between gap-3 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-4 text-sm text-emerald-300">
+          <span>{success}</span>
+
+          <button
+            type="button"
+            onClick={() => setSuccess("")}
+            className="rounded-md px-2 py-1 text-emerald-300/80 transition hover:bg-emerald-400/10 hover:text-emerald-200"
+            aria-label="Sluit melding"
+          >
+            ×
+          </button>
         </div>
       ) : null}
 
@@ -480,7 +525,10 @@ export default function ModelSettings() {
               : "—"
           }
         />
-        <MiniStat label="Updated by" value={configAvailable ? configMeta.updatedBy || "—" : "—"} />
+        <MiniStat
+          label="Updated by"
+          value={configAvailable ? configMeta.updatedBy || "—" : "—"}
+        />
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.2fr_380px]">
