@@ -1,15 +1,18 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import RadarChart from "../../components/charts/RadarChart.jsx";
 import DashboardMiniStat from "../../components/dashboard/DashboardMiniStat.jsx";
 import DashboardPanel from "../../components/dashboard/DashboardPanel.jsx";
 import DashboardSettingRow from "../../components/dashboard/DashboardSettingRow.jsx";
 import DashboardTabButton from "../../components/dashboard/DashboardTabButton.jsx";
+
 import {
   getAdminConfig,
   updateAdminConfig,
   resetAdminConfig,
 } from "../../services/admin.js";
+
 import { addActivityLogItem } from "../../services/activityLog.js";
+
 import {
   SECTION_OPTIONS,
   SECTION_FIELDS,
@@ -20,8 +23,6 @@ import {
 } from "./modelSettings.helpers.js";
 
 export default function ModelSettings() {
-  const headingRef = useRef(null);
-
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
@@ -44,10 +45,6 @@ export default function ModelSettings() {
   }
 
   useEffect(() => {
-    headingRef.current?.focus();
-  }, []);
-
-  useEffect(() => {
     let active = true;
 
     async function loadConfig() {
@@ -64,7 +61,7 @@ export default function ModelSettings() {
       } catch (err) {
         if (!active) return;
         setConfigAvailable(false);
-        setError(err.message || "Config kon niet geladen worden.");
+        setError(err.message || "Failed to load config.");
       } finally {
         if (active) setLoading(false);
       }
@@ -80,18 +77,39 @@ export default function ModelSettings() {
   useEffect(() => {
     if (!success) return;
 
-    const timer = window.setTimeout(() => {
+    const timer = setTimeout(() => {
       setSuccess("");
     }, 3500);
 
-    return () => window.clearTimeout(timer);
+    return () => clearTimeout(timer);
   }, [success]);
 
   function updateSetting(key, value) {
-    setSettings((prev) => ({
-      ...prev,
-      [key]: Number(value),
-    }));
+    const numericValue = Number(value);
+
+    setSettings((prev) => {
+      // FIX: CF weights must sum to 100
+      if (key === "cfTrackWeight") {
+        return {
+          ...prev,
+          cfTrackWeight: numericValue,
+          cfArtistWeight: 100 - numericValue,
+        };
+      }
+
+      if (key === "cfArtistWeight") {
+        return {
+          ...prev,
+          cfArtistWeight: numericValue,
+          cfTrackWeight: 100 - numericValue,
+        };
+      }
+
+      return {
+        ...prev,
+        [key]: numericValue,
+      };
+    });
   }
 
   function updateHybridGenre(value) {
@@ -118,12 +136,7 @@ export default function ModelSettings() {
     const fields = SECTION_FIELDS[activeSection] || [];
 
     return (
-      <div
-        id={`panel-${activeSection}`}
-        role="tabpanel"
-        aria-label={`${activeSection} settings`}
-        className="space-y-4"
-      >
+      <div className="space-y-4">
         {fields.map((field) => {
           let onChange;
 
@@ -138,7 +151,6 @@ export default function ModelSettings() {
           return (
             <DashboardSettingRow
               key={field.key}
-              id={`setting-${field.key}`}
               label={field.label}
               value={settings[field.key]}
               min={field.min ?? 0}
@@ -170,7 +182,7 @@ export default function ModelSettings() {
     if (!configAvailable) return;
 
     const confirmed = window.confirm(
-      "Weet je zeker dat je deze modelinstellingen wilt opslaan?"
+      "Are you sure you want to save these model settings?"
     );
     if (!confirmed) return;
 
@@ -183,17 +195,21 @@ export default function ModelSettings() {
       const updated = await updateAdminConfig(payload);
 
       applyConfig(updated);
-      setSuccess("Modelinstellingen opgeslagen.");
+      setSuccess("Model settings saved successfully.");
 
-      addActivityLogItem({
-        type: "success",
-        title: "Modelinstellingen opgeslagen",
-        description:
-          "Een admin heeft recommendation tuning aangepast en opgeslagen.",
-        source: "model-settings",
-      });
+      // SAFE LOGGING
+      try {
+        addActivityLogItem({
+          type: "success",
+          title: "Model settings saved",
+          description: "Recommendation tuning updated.",
+          source: "model-settings",
+        });
+      } catch (err) {
+        console.error("Activity log failed:", err);
+      }
     } catch (err) {
-      setError(err.message || "Opslaan mislukt.");
+      setError(err.message || "Failed to save settings.");
     } finally {
       setSaving(false);
     }
@@ -203,7 +219,7 @@ export default function ModelSettings() {
     if (!configAvailable) return;
 
     const confirmed = window.confirm(
-      "Weet je zeker dat je de modelinstellingen wilt resetten?"
+      "Are you sure you want to reset the model settings?"
     );
     if (!confirmed) return;
 
@@ -214,78 +230,73 @@ export default function ModelSettings() {
 
       const resetConfig = await resetAdminConfig();
       applyConfig(resetConfig);
-      setSuccess("Modelinstellingen teruggezet naar defaults.");
+
+      setSuccess("Model settings reset to defaults.");
+
+      try {
+        addActivityLogItem({
+          type: "warning",
+          title: "Model settings reset",
+          description: "Recommendation tuning reset.",
+          source: "model-settings",
+        });
+      } catch (err) {
+        console.error("Activity log failed:", err);
+      }
     } catch (err) {
-      setError(err.message || "Reset mislukt.");
+      setError(err.message || "Reset failed.");
     } finally {
       setResetting(false);
     }
   }
 
   if (loading) {
-    return (
-      <div className="rounded-2xl border border-white/12 bg-[#181919] p-5 text-text-primary">
-        Config laden...
-      </div>
-    );
+    return <div className="p-5 text-text-primary">Loading config...</div>;
   }
 
   return (
     <div className="min-h-screen bg-[#111315] text-text-primary">
       <header className="mb-8">
-        <p className="text-xs uppercase tracking-[0.2em] text-white/65">
-          SonarPop admin dashboard
-        </p>
-
-        <h1
-          ref={headingRef}
-          tabIndex="-1"
-          className="mt-2 text-4xl font-bold text-text-primary"
-        >
-          Model Settings
-        </h1>
-
-        <p className="mt-3 text-sm text-white/75">
-          Configure the current recommendation model behavior
+        <h1 className="text-4xl font-bold">Model Settings</h1>
+        <p className="mt-2 text-sm text-white/70">
+          Configure the recommendation model behavior
         </p>
       </header>
 
       {error && (
-        <div
-          className="mb-4 rounded-2xl border border-red-400/25 bg-red-500/12 p-4 text-sm text-red-200"
-          role="alert"
-        >
+        <div className="mb-4 rounded-xl bg-red-500/20 p-4 text-red-200">
           {error}
         </div>
       )}
 
       {success && (
-        <div
-          className="mb-4 flex justify-between rounded-2xl border border-emerald-400/25 bg-emerald-500/12 p-4 text-sm text-emerald-200"
-          role="status"
-        >
-          <span>{success}</span>
-          <button
-            onClick={() => setSuccess("")}
-            className="focus-visible:ring-2 focus-visible:ring-emerald-300"
-          >
-            ×
-          </button>
+        <div className="mb-4 rounded-xl bg-emerald-500/20 p-4 text-emerald-200">
+          {success}
         </div>
       )}
 
       <section className="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <DashboardMiniStat label="Genre match" value={settings.hybridGenre} />
         <DashboardMiniStat label="Similar listeners" value={settings.hybridCf} />
-        <DashboardMiniStat label="Updated at" value={configMeta.updatedAt} />
-        <DashboardMiniStat label="Updated by" value={configMeta.updatedBy} />
+        <DashboardMiniStat
+          label="Updated at"
+          value={
+            configMeta.updatedAt
+              ? new Date(configMeta.updatedAt).toLocaleString()
+              : "—"
+          }
+        />
+        <DashboardMiniStat
+          label="Updated by"
+          value={configMeta.updatedBy || "—"}
+        />
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.2fr_380px]">
         <DashboardPanel
           title="Tuning"
           right={
-            <div role="tablist" className="flex gap-2">
+            <div className="flex gap-2">
               {SECTION_OPTIONS.map((section) => (
                 <DashboardTabButton
                   key={section.key}
@@ -303,16 +314,31 @@ export default function ModelSettings() {
 
         <div className="space-y-4">
           <DashboardPanel title="Model profile">
-            <RadarChart {...radarData} />
+            <RadarChart
+              labels={radarData.labels}
+              values={radarData.values}
+              chartLabel="Model profile"
+            />
           </DashboardPanel>
 
           <DashboardPanel title="Actions">
-            <button onClick={handleSave} className="w-full">
-              Opslaan
-            </button>
-            <button onClick={handleReset} className="w-full">
-              Reset
-            </button>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="rounded-xl bg-white/10 px-4 py-3"
+              >
+                {saving ? "Saving..." : "Save changes"}
+              </button>
+
+              <button
+                onClick={handleReset}
+                disabled={resetting}
+                className="rounded-xl border px-4 py-3"
+              >
+                {resetting ? "Resetting..." : "Reset"}
+              </button>
+            </div>
           </DashboardPanel>
         </div>
       </section>
