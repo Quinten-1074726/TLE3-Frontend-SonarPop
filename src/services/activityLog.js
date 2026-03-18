@@ -14,6 +14,18 @@ function writeLog(items) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
 }
 
+function generateId() {
+  if (
+    typeof globalThis !== "undefined" &&
+    globalThis.crypto &&
+    typeof globalThis.crypto.randomUUID === "function"
+  ) {
+    return globalThis.crypto.randomUUID();
+  }
+
+  return `log-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 export function getActivityLog() {
   return readLog();
 }
@@ -22,9 +34,9 @@ export function addActivityLogItem(item) {
   const items = readLog();
 
   const nextItem = {
-    id: crypto.randomUUID(),
+    id: generateId(),
     type: item.type || "info",
-    title: item.title || "Onbekende actie",
+    title: item.title || "Unknown action",
     description: item.description || "",
     source: item.source || "dashboard",
     timestamp: item.timestamp || new Date().toISOString(),
