@@ -200,7 +200,12 @@ export default function MusicProvider({ children }) {
         playTrack: (track, newQueue = []) => {
           const q = newQueue.length > 0 ? newQueue : [track];
           setQueue(q);
-          setCurrentTrackIndex(q.indexOf(track));
+          setCurrentTrackIndex(
+            Math.max(
+              0,
+              q.findIndex((t) => t.id === track.id),
+            ),
+          );
           setIsPlaying(true);
         },
         togglePlay,
