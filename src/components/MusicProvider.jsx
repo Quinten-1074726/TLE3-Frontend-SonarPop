@@ -15,6 +15,7 @@ export const MusicContext = createContext();
 export default function MusicProvider({ children }) {
     const BASE_URL = import.meta.env.VITE_BASE_URL;
     const API_KEY = import.meta.env.VITE_API_KEY;
+    const token = localStorage.getItem("token");
 
     const [isExpanded, setIsExpanded] = useState(false);
     const [queue, setQueue] = useState([]);
@@ -124,37 +125,30 @@ export default function MusicProvider({ children }) {
         }
     }, [isExpanded]);
 
-    //LIKE FEATURE
-    const handleLike = async (e) => {
-        if (e && e.stopPropagation) e.stopPropagation();
-        if (!currentTrack?._id) return;
-        console.log("TRACK:", currentTrack);
+// LIKE FEATURE
+    const handleLike = async (track) => {
+        if (!track) return console.warn("No track available to like");
 
         try {
-            if (liked) {
-                await fetch(`${BASE_URL}/feedback/${currentTrack._id}`, {
-                    method: "DELETE",
-                    headers: {
-                        "X-API-Key": API_KEY
-                    }
-                });
-                setLiked(false);
-            } else {
-                await fetch(`${BASE_URL}/feedback`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-API-Key": API_KEY
-                    },
-                    body: JSON.stringify({
-                        trackId: currentTrack._id,
-                        action: "like"
-                    })
-                });
-                setLiked(true);
-            }
+            const res = await fetch(`${BASE_URL}/feedback`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                    "X-API-Key": API_KEY
+                },
+                body: JSON.stringify({
+                    trackId: track._id || track.id,
+                    action: "like"
+                })
+            });
+
+            if (!res.ok) throw new Error(await res.text());
+
+            setLiked(true);
+            console.log("Track geliked:", track.title);
         } catch (err) {
-            console.error(err);
+            console.error("Error liking track:", err);
         }
     };
 
@@ -202,7 +196,7 @@ export default function MusicProvider({ children }) {
 
                         {isExpanded && (
                             <div
-                                className="absolute w-fit inset-0 bg-black/80 backdrop-blur-xl transition-opacity duration-500"
+                                className="absolute inset-0 bg-black/80 backdrop-blur-xl transition-opacity duration-500 z-0"
                                 onClick={() => setIsExpanded(false)}
                                 aria-hidden="true"
                             />
@@ -211,9 +205,8 @@ export default function MusicProvider({ children }) {
                         <div
                             ref={expandedContainerRef}
                             className={`
-                                relative w-full max-w-[430px] bg-zinc-900 shadow-2xl overflow-hidden border border-white/10
-                                transition-all duration-700 cubic-bezier(0.2, 1, 0.3, 1)
-                                ${isExpanded ? " h-[92vh] rounded-[40px] mt-4" : "h-20 rounded-2xl cursor-pointer"}
+                                relative z-10 w-full max-w-[430px] bg-zinc-900 shadow-2xl overflow-hidden border border-white/10
+                                ${isExpanded ? "h-[92vh] rounded-[40px] mt-4" : "h-20 rounded-2xl cursor-pointer"}
                             `}
                         >
                             {/* mini player */}
@@ -289,18 +282,14 @@ export default function MusicProvider({ children }) {
                                         </div>
 
                                         <button
-                                            onClick={handleLike}
-                                            aria-label="Add to favorites"
-                                            className="flex-shrink-0 p-2 focus-visible:ring-2 focus-visible:ring-white rounded-full outline-none"
+                                            onClick={() => {
+                                                handleLike(currentTrack);
+                                                setLiked((prev) => !prev); // toggle visual state
+                                            }}
+                                            aria-label={liked ? "Unlike this track" : "Like this track"}
+                                            className="p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-white transition-colors"
                                         >
-                                            <Heart
-                                                size={24}
-                                                className={`transition-opacity ${
-                                                    liked
-                                                        ? "text-red-500 fill-red-500 opacity-100"
-                                                        : "text-white opacity-40 hover:opacity-100"
-                                                }`}
-                                            />
+                                            <Heart size={20} fill={liked ? "currentColor" : "none"} stroke={liked ? "none" : "currentColor"} className={liked ? "text-red-500" : "text-white/60 hover:text-white"} />
                                         </button>
                                     </div>
 
