@@ -1,5 +1,5 @@
 // THIS FILE IS FOR THE HOME PAGE - CURRENTLY LOADS RECOMMENDED SONGS & ARTISTS
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import notFound from "../../assets/Image-not-found.png";
 
 function useRecommendations(sliderValue) {
@@ -12,6 +12,7 @@ function useRecommendations(sliderValue) {
 
     useEffect(() => {
         let isMounted = true
+
         async function loadRecommendations() {
             setLoading(true)
             try {
@@ -30,7 +31,7 @@ function useRecommendations(sliderValue) {
                     body: JSON.stringify({}),
                 });
 
-                const { vector } = await profileRes.json();
+                const {vector} = await profileRes.json();
 
 
                 // Get song recommendations and use sliderValue to change the dial
@@ -44,18 +45,19 @@ function useRecommendations(sliderValue) {
                     }),
                 });
 
-                console.log(sliderValue)
 
                 const data = await recRes.json();
-                console.log(data)
 
-                const mappedTracks = data.tracks.map(({ track }) => ({
+                const mappedTracks = data.tracks.map(({track}) => ({
                     id: track._id,
                     title: track.title,
                     artist: track.artist,
                     imageUrl: track.imageUrl || track.albumImages?.[0]?.url,
                     similarArtists: track.similarArtists || [],
+                    previewUrl: track.previewUrl
                 }));
+
+
 
                 setTracks(mappedTracks);
 
@@ -85,18 +87,18 @@ function useRecommendations(sliderValue) {
                 setLoading(false);
             }
         }
-        
+
         const handler = setTimeout(() => {
             loadRecommendations()
         }, 400)
-        
+
         return () => {
             isMounted = false
             clearTimeout(handler)
         }
     }, [API_KEY, BASE_URL, sliderValue]);
 
-    return { tracks, artists, loading };
+    return {tracks, artists, loading};
 }
 
 export default useRecommendations;
