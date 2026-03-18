@@ -352,7 +352,7 @@ function Preferences() {
                 {lists[tab.key]?.slice(0, 5).map((item) => (
                   <li
                     key={item._id}
-                    className="p-2 bg-text-primary rounded shadow flex justify-between items-center"
+                    className="p-2 bg-secondary rounded shadow flex justify-between items-center text-text-primary"
                   >
                     <span>{item.value}</span>
 
