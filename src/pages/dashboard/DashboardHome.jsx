@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-
-import BarChart from "../../components/charts/BarChart.jsx";
-import DonutChart from "../../components/charts/DonutChart.jsx";
-import { getDashboardBootstrap } from "../../services/dashboard.js";
 import { getUserRole } from "../../auth/AuthStorage.js";
+import { getAdminConfig } from "../../services/admin.js";
+
+import DonutChart from "../../components/charts/DonutChart.jsx";
+import RadarChart from "../../components/charts/RadarChart.jsx";
+import BarChart from "../../components/charts/BarChart.jsx";
 
 function StatCard({ title, value, subtitle }) {
   return (
@@ -15,13 +16,10 @@ function StatCard({ title, value, subtitle }) {
   );
 }
 
-function Panel({ title, children, helper }) {
+function Panel({ title, children }) {
   return (
     <section className="rounded-2xl border border-white/10 bg-[#181919] p-5">
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold text-text-primary">{title}</h2>
-        {helper ? <p className="mt-1 text-xs text-white/45">{helper}</p> : null}
-      </div>
+      <h2 className="mb-4 text-xl font-semibold text-text-primary">{title}</h2>
       {children}
     </section>
   );
@@ -35,161 +33,174 @@ function EmptyState({ text }) {
   );
 }
 
-function clamp(value, min = 0, max = 100) {
-  return Math.max(min, Math.min(max, value));
+function MiniSignal({ label, value }) {
+  return (
+    <div className="rounded-xl border border-white/8 bg-white/[0.03] p-4">
+      <p className="text-xs text-white/45">{label}</p>
+      <p className="mt-2 text-base font-semibold text-text-primary">{value}</p>
+    </div>
+  );
+}
+
+function normalizePercent(value, fallback = 50) {
+  if (typeof value !== "number" || Number.isNaN(value)) return fallback;
+  return Math.round(value * 100);
+}
+
+function getSafeHybridValues(config) {
+  const genre = normalizePercent(config?.hybridWeights?.genre, 50);
+  const cf = normalizePercent(config?.hybridWeights?.cf, 50);
+
+  if (genre + cf === 100) {
+    return { genre, cf };
+  }
+
+  return {
+    genre,
+    cf: 100 - genre,
+  };
+}
+
+function getMixLabel(genre, listeners) {
+  if (genre >= 70) return "Genre-led";
+  if (listeners >= 70) return "Listener-led";
+  return "Balanced";
+}
+
+function getDiscoveryLabel(value) {
+  if (value >= 120) return "High";
+  if (value >= 95) return "Medium";
+  return "Low";
+}
+
+function getLearningLabel(value) {
+  if (value >= 50) return "High";
+  if (value >= 20) return "Medium";
+  return "Low";
 }
 
 export default function DashboardHome() {
-  const [loading, setLoading] = useState(true);
-  const [bootstrapError, setBootstrapError] = useState("");
-
-  const [genres, setGenres] = useState([]);
-  const [tracks, setTracks] = useState([]);
-  const [dialPresets, setDialPresets] = useState([]);
-
   const role = getUserRole();
-  const isAdmin = role === "admin";
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [configAvailable, setConfigAvailable] = useState(false);
+
+  const [settings, setSettings] = useState({
+    hybridGenre: 50,
+    hybridCf: 50,
+
+    feedbackLike: 110,
+    feedbackDislike: 50,
+    feedbackLibrary: 120,
+    feedbackSkip: 90,
+
+    cfTrackWeight: 70,
+    cfArtistWeight: 30,
+
+    learningRate: 10,
+    maxShift: 30,
+  });
 
   useEffect(() => {
     let active = true;
 
-    async function load() {
+    async function loadConfig() {
       try {
         setLoading(true);
-        setBootstrapError("");
+        setError("");
 
-        const bootstrap = await getDashboardBootstrap();
+        const config = await getAdminConfig();
         if (!active) return;
 
-        const normalizedGenres = Array.isArray(bootstrap?.genres?.items)
-          ? bootstrap.genres.items
-          : Array.isArray(bootstrap?.genres)
-          ? bootstrap.genres
-          : [];
+        const safeHybrid = getSafeHybridValues(config);
 
-        const normalizedTracks = Array.isArray(bootstrap?.tracks?.items)
-          ? bootstrap.tracks.items
-          : Array.isArray(bootstrap?.tracks)
-          ? bootstrap.tracks
-          : [];
+        setSettings({
+          hybridGenre: safeHybrid.genre,
+          hybridCf: safeHybrid.cf,
 
-        const normalizedDial = Array.isArray(bootstrap?.dial?.presets)
-          ? bootstrap.dial.presets
-          : Array.isArray(bootstrap?.dial)
-          ? bootstrap.dial
-          : [];
+          feedbackLike: normalizePercent(config?.feedbackMultipliers?.like, 110),
+          feedbackDislike: normalizePercent(config?.feedbackMultipliers?.dislike, 50),
+          feedbackLibrary: normalizePercent(config?.feedbackMultipliers?.library, 120),
+          feedbackSkip: normalizePercent(config?.feedbackMultipliers?.skip, 90),
 
-        setGenres(normalizedGenres);
-        setTracks(normalizedTracks);
-        setDialPresets(normalizedDial);
+          cfTrackWeight: normalizePercent(
+            config?.cfWeights?.trackWeight ?? config?.cfWeights?.track,
+            70
+          ),
+          cfArtistWeight: normalizePercent(
+            config?.cfWeights?.artistWeight ?? config?.cfWeights?.artist,
+            30
+          ),
 
-        const allFailed = !bootstrap?.genres && !bootstrap?.tracks && !bootstrap?.dial;
-        if (allFailed) {
-          setBootstrapError("Dashboarddata kon niet geladen worden.");
-        }
-      } catch (error) {
+          learningRate: normalizePercent(
+            config?.profileEvolution?.learningRate ?? config?.profileEvolution?.like,
+            10
+          ),
+          maxShift: normalizePercent(
+            config?.profileEvolution?.maxShift ?? config?.profileEvolution?.library,
+            30
+          ),
+        });
+
+        setConfigAvailable(true);
+      } catch (err) {
         if (!active) return;
-        setBootstrapError("Dashboarddata kon niet geladen worden.");
+        setConfigAvailable(false);
+        setError(err.message || "Overview kon niet geladen worden.");
       } finally {
         if (active) setLoading(false);
       }
     }
 
-    load();
+    loadConfig();
 
     return () => {
       active = false;
     };
   }, []);
 
-  const totalTracks = tracks.length;
-  const totalGenres = genres.length;
-  const totalDialPresets = dialPresets.length;
-
-  const genreDistribution = useMemo(() => {
-    if (genres.length === 0 || tracks.length === 0) {
-      return {
-        labels: [],
-        values: [],
-        allValues: [],
-      };
-    }
-
-    const sums = Array.from({ length: genres.length }, () => 0);
-
-    tracks.forEach((track) => {
-      const vector = Array.isArray(track.genreVector) ? track.genreVector : [];
-      vector.forEach((value, index) => {
-        if (typeof value === "number" && Number.isFinite(value)) {
-          sums[index] += value;
-        }
-      });
-    });
-
-    const combined = genres.map((genre, index) => ({
-      label: genre.name || genre.genre || `Genre ${index + 1}`,
-      value: Number((sums[index] || 0).toFixed(2)),
-    }));
-
-    const sorted = combined
-      .filter((item) => item.value > 0)
-      .sort((a, b) => b.value - a.value);
-
+  const mixData = useMemo(() => {
     return {
-      labels: sorted.slice(0, 5).map((item) => item.label),
-      values: sorted.slice(0, 5).map((item) => item.value),
-      allValues: sorted.map((item) => item.value),
+      labels: ["Genre match", "Similar listeners"],
+      values: [settings.hybridGenre, settings.hybridCf],
     };
-  }, [genres, tracks]);
+  }, [settings]);
 
-  const dominantGenre = genreDistribution.labels[0] || "—";
-
-  const catalogDiversityScore = useMemo(() => {
-    const values = genreDistribution.allValues;
-    const total = values.reduce((sum, value) => sum + value, 0);
-
-    if (!total || values.length === 0) return null;
-
-    const normalized = values.map((value) => value / total);
-    const concentration = normalized.reduce((sum, value) => sum + value * value, 0);
-
-    return Math.round(clamp((1 - concentration) * 100));
-  }, [genreDistribution]);
-
-  const topVsRestData = useMemo(() => {
-    const values = genreDistribution.allValues;
-
-    if (values.length === 0) {
-      return {
-        labels: ["Top 3 genres", "Overig"],
-        values: [0, 0],
-      };
-    }
-
-    const total = values.reduce((sum, value) => sum + value, 0);
-    if (!total) {
-      return {
-        labels: ["Top 3 genres", "Overig"],
-        values: [0, 0],
-      };
-    }
-
-    const topThree = values.slice(0, 3).reduce((sum, value) => sum + value, 0);
-    const rest = Math.max(total - topThree, 0);
-
+  const feedbackData = useMemo(() => {
     return {
-      labels: ["Top 3 genres", "Overig"],
-      values: [Number(topThree.toFixed(2)), Number(rest.toFixed(2))],
+      labels: ["Like", "Dislike", "Library", "Skip"],
+      values: [
+        settings.feedbackLike,
+        settings.feedbackDislike,
+        settings.feedbackLibrary,
+        settings.feedbackSkip,
+      ],
     };
-  }, [genreDistribution]);
+  }, [settings]);
 
-  const hasGenreData = genreDistribution.labels.length > 0;
-  const hasDonutData = topVsRestData.values.some((value) => value > 0);
+  const radarData = useMemo(() => {
+    return {
+      labels: ["Genre", "Listeners", "Discovery", "Learning", "Track", "Artist"],
+      values: [
+        settings.hybridGenre / 100,
+        settings.hybridCf / 100,
+        settings.feedbackLibrary / 200,
+        settings.learningRate / 100,
+        settings.cfTrackWeight / 100,
+        settings.cfArtistWeight / 100,
+      ],
+    };
+  }, [settings]);
+
+  const mixLabel = getMixLabel(settings.hybridGenre, settings.hybridCf);
+  const discoveryLabel = getDiscoveryLabel(settings.feedbackLibrary);
+  const learningLabel = getLearningLabel(settings.learningRate);
 
   if (loading) {
     return (
       <div className="rounded-2xl border border-white/10 bg-[#181919] p-5 text-text-primary">
-        Dashboard laden...
+        Overview laden...
       </div>
     );
   }
@@ -198,58 +209,104 @@ export default function DashboardHome() {
     <div className="min-h-screen bg-[#111315] text-text-primary">
       <header className="mb-8">
         <p className="text-xs uppercase tracking-[0.2em] text-white/45">
-          SonarPop {role} dashboard
+          SonarPoppy {role} dashboard
         </p>
         <h1 className="mt-2 text-4xl font-bold">Overview</h1>
         <p className="mt-3 text-sm text-white/60">
-          {isAdmin ? "Admin overview" : "Curator overview"}
+          Current model and recommendation balance
         </p>
       </header>
 
-      {bootstrapError ? (
-        <div className="mb-6 rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-300">
-          {bootstrapError}
+      {error ? (
+        <div className="mb-4 rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-300">
+          {error}
+        </div>
+      ) : null}
+
+      {!configAvailable ? (
+        <div className="mb-6 rounded-2xl border border-white/10 bg-[#181919] p-5 text-sm text-white/60">
+          De modelconfig is nog niet beschikbaar op deze backend.
         </div>
       ) : null}
 
       <section className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard title="Tracks" value={totalTracks || "—"} subtitle="Catalogus" />
-        <StatCard title="Genres" value={totalGenres || "—"} subtitle="Beschikbaar" />
         <StatCard
-          title="Diversiteit"
-          value={catalogDiversityScore !== null ? `${catalogDiversityScore}%` : "—"}
-          subtitle="Catalogus"
+          title="Genre match"
+          value={configAvailable ? settings.hybridGenre : "—"}
+          subtitle="Content-driven weight"
         />
         <StatCard
-          title="Dial presets"
-          value={totalDialPresets || "—"}
-          subtitle={dominantGenre !== "—" ? `Dominant: ${dominantGenre}` : "Model"}
+          title="Similar listeners"
+          value={configAvailable ? settings.hybridCf : "—"}
+          subtitle="Behavior-driven weight"
+        />
+        <StatCard
+          title="Discovery level"
+          value={configAvailable ? discoveryLabel : "—"}
+          subtitle="Based on library boost"
+        />
+        <StatCard
+          title="Learning level"
+          value={configAvailable ? learningLabel : "—"}
+          subtitle="Profile adaptation signal"
         />
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-[1.35fr_1fr]">
-        <Panel title="Genreprofiel">
-          {hasGenreData ? (
-            <BarChart
-              labels={genreDistribution.labels}
-              values={genreDistribution.values}
-              chartLabel="Genreprofiel"
+      <section className="mb-6 grid gap-4 xl:grid-cols-[1.1fr_1fr]">
+        <Panel title="Model mix">
+          {configAvailable ? (
+            <DonutChart
+              labels={mixData.labels}
+              values={mixData.values}
+              chartLabel="Model mix"
             />
           ) : (
-            <EmptyState text="Nog geen chartdata beschikbaar." />
+            <EmptyState text="Nog geen modeldata beschikbaar." />
           )}
         </Panel>
 
-        <Panel title="Concentratie">
-          {hasDonutData ? (
-            <DonutChart
-              labels={topVsRestData.labels}
-              values={topVsRestData.values}
-              chartLabel="Concentratie"
+        <Panel title="Model profile">
+          {configAvailable ? (
+            <RadarChart
+              labels={radarData.labels}
+              values={radarData.values}
+              chartLabel="Model profile"
             />
           ) : (
-            <EmptyState text="Nog geen chartdata beschikbaar." />
+            <EmptyState text="Nog geen profieldata beschikbaar." />
           )}
+        </Panel>
+      </section>
+
+      <section className="mb-6 grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+        <Panel title="Feedback impact">
+          {configAvailable ? (
+            <BarChart
+              labels={feedbackData.labels}
+              values={feedbackData.values}
+              chartLabel="Feedback impact"
+            />
+          ) : (
+            <EmptyState text="Nog geen feedbackdata beschikbaar." />
+          )}
+        </Panel>
+
+        <Panel title="Current signals">
+          <div className="space-y-3">
+            <MiniSignal label="Mix focus" value={configAvailable ? mixLabel : "—"} />
+            <MiniSignal
+              label="Track similarity"
+              value={configAvailable ? `${settings.cfTrackWeight}` : "—"}
+            />
+            <MiniSignal
+              label="Artist similarity"
+              value={configAvailable ? `${settings.cfArtistWeight}` : "—"}
+            />
+            <MiniSignal
+              label="Profile learning"
+              value={configAvailable ? learningLabel : "—"}
+            />
+          </div>
         </Panel>
       </section>
     </div>
