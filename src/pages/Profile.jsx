@@ -7,54 +7,22 @@ import ProfileCarousel from "../components/Cards & Carousels/ProfileCarousel.jsx
 import defaultProfile from "../assets/default-profile.png";
 import { getProfilePageData } from "../services/Profile.js";
 import { logout } from "../auth/AuthStorage";
-
-const mockFavoriteSongs = [
-  {
-    id: "song-1",
-    name: "Dromen In Kleur",
-    artist: "Suzan & Freek",
-    image: "https://placehold.co/300x300?text=Dromen+In+Kleur",
-  },
-  {
-    id: "song-2",
-    name: "Blauwe Dag",
-    artist: "Suzan & Freek",
-    image: "https://placehold.co/300x300?text=Blauwe+Dag",
-  },
-  {
-    id: "song-3",
-    name: "De Overkant",
-    artist: "Suzan & Freek",
-    image: "https://placehold.co/300x300?text=De+Overkant",
-  },
-  {
-    id: "song-4",
-    name: "Brabant",
-    artist: "Guus Meeuwis",
-    image: "https://placehold.co/300x300?text=Brabant",
-  },
-  {
-    id: "song-5",
-    name: "Het Is Een Nacht",
-    artist: "Guus Meeuwis",
-    image: "https://placehold.co/300x300?text=Het+Is+Een+Nacht",
-  },
-];
+import useLikedSongs from "../hooks/useLikedSongs.js";
 
 const mockFriends = [
   {
     id: "friend-1",
-    username: "Rob Petten",
-    avatar: "https://placehold.co/200x200?text=Rob",
+    username: "Robbert",
+    avatar: "https://placehold.co/200x200?text=Robbert",
   },
   {
     id: "friend-2",
-    username: "Barend Drecht",
-    avatar: "https://placehold.co/200x200?text=Barend",
+    username: "Jessica",
+    avatar: "https://placehold.co/200x200?text=Jessica",
   },
   {
     id: "friend-3",
-    username: "Mark Putte",
+    username: "Mark",
     avatar: "https://placehold.co/200x200?text=Mark",
   },
 ];
@@ -63,9 +31,15 @@ function Profile() {
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
-  const [favoriteSongs, setFavoriteSongs] = useState([]);
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const {
+    likedSongs,
+    isLiked,
+    toggleLike,
+    loading: likedSongsLoading,
+  } = useLikedSongs();
 
   useEffect(() => {
     let isMounted = true;
@@ -84,20 +58,9 @@ function Profile() {
 
         if (!isMounted) return;
 
-        const fetchedFavoriteSongs = data?.favoriteTracks || [];
         const fetchedFriends = data?.friends || [];
 
-        setFavoriteSongs(
-          fetchedFavoriteSongs.length > 0
-            ? fetchedFavoriteSongs
-            : mockFavoriteSongs
-        );
-
-        setFriends(
-          fetchedFriends.length > 0
-            ? fetchedFriends
-            : mockFriends
-        );
+        setFriends(fetchedFriends.length > 0 ? fetchedFriends : mockFriends);
       } catch (err) {
         console.error("Error while loading profile:", err);
 
@@ -107,7 +70,6 @@ function Profile() {
         const parsedUser = storedUser ? JSON.parse(storedUser) : null;
 
         setUser(parsedUser);
-        setFavoriteSongs(mockFavoriteSongs);
         setFriends(mockFriends);
       } finally {
         if (isMounted) {
@@ -130,6 +92,7 @@ function Profile() {
 
   const displayName = user?.username || user?.name || "User";
   const avatar = user?.avatar || user?.profileImage || defaultProfile;
+  const isPageLoading = loading || likedSongsLoading;
 
   return (
     <div className="min-h-screen bg-background text-text-primary pb-28">
@@ -143,9 +106,7 @@ function Profile() {
             />
 
             <div className="flex-1 min-w-0 pt-1">
-              <p className="text-white/60 text-sm font-semibold">
-                Profile
-              </p>
+              <p className="text-white/60 text-sm font-semibold">Profile</p>
 
               <h1 className="text-3xl font-bold leading-tight break-words">
                 {displayName}
@@ -196,19 +157,18 @@ function Profile() {
         </div>
 
         <div className="mt-8 flex flex-col gap-8">
-          {loading ? (
-            <p
-              className="px-6 text-sm text-white/80"
-              aria-live="polite"
-            >
+          {isPageLoading ? (
+            <p className="px-6 text-sm text-white/80" aria-live="polite">
               Loading profile...
             </p>
           ) : (
             <>
               <SongCarousel
-                title="Your favorites this week"
-                cards={favoriteSongs}
+                title="Your favorites"
+                cards={likedSongs}
                 emptyText="No favorite songs found yet."
+                isLiked={isLiked}
+                onToggleLike={toggleLike}
               />
 
               <ProfileCarousel

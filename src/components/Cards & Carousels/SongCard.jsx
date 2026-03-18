@@ -1,22 +1,24 @@
 import notFound from "../../assets/Image-not-found.png";
-import { Play } from "lucide-react";
+import { Play, Heart } from "lucide-react";
 import { useContext } from "react";
 import { MusicContext } from "../MusicProvider.jsx";
 
-function SongCard({ card, playlist = [] }) {
+function SongCard({ card, playlist = [], isLiked = false, onToggleLike }) {
   const { playTrack, currentTrack, isPlaying } = useContext(MusicContext);
-  const image = card?.imageUrl || notFound;
+
+  const image = card?.imageUrl || card?.image || notFound;
   const songName = card?.name || card?.title || "Unknown song";
   const artistName = card?.artist || card?.artistName || "Unknown artist";
   const previewUrl = card?.previewUrl || card?.preview_url || card?.src;
 
-  const isCurrent = currentTrack?.id === card?.id;
+  const cardId = card?.id || card?._id;
+  const isCurrent = currentTrack?.id === cardId;
 
   const normalizeTrack = (c) => ({
-    id: c.id || Math.random(),
+    id: c.id || c._id || Math.random(),
     title: c.name || c.title || "Unknown song",
     author: c.artist || c.artistName || "Unknown artist",
-    cover: c.imageUrl || notFound,
+    cover: c.imageUrl || c.image || notFound,
     src: c.previewUrl || c.preview_url || c.src,
     album: c.album || { title: "album" },
   });
@@ -42,17 +44,39 @@ function SongCard({ card, playlist = [] }) {
     }
   };
 
+  const handleLikeClick = async (e) => {
+    e.stopPropagation();
+
+    try {
+      await onToggleLike?.(card);
+    } catch (error) {
+      console.error("Kon like niet aanpassen:", error);
+    }
+  };
+
   return (
     <div
       className="group w-36 flex flex-col cursor-pointer transition-transform active:scale-95"
       onClick={handlePlay}
     >
-      <div className="relative w-36 h-36 mb-2 overflow-hidden rounded-xl shadow-lg  flex flex-col">
+      <div className="relative w-36 h-36 mb-2 overflow-hidden rounded-xl shadow-lg flex flex-col">
         <img
           src={image}
           alt={songName}
           className="w-36 h-36 object-cover rounded-xl mb-2"
         />
+
+        <button
+          type="button"
+          onClick={handleLikeClick}
+          aria-label={isLiked ? "Unlike song" : "Like song"}
+          className="absolute top-2 right-2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:scale-105"
+        >
+          <Heart
+            size={18}
+            className={isLiked ? "fill-red-500 text-red-500" : "text-white"}
+          />
+        </button>
 
         <div
           className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-300 ${

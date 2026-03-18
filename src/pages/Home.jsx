@@ -12,7 +12,9 @@ import RandomSongCard from "../components/RandomSongCard.jsx";
 import useRecommendations from "../components/hooks/useRecommendations.js";
 import ArtistCarousel from "../components/Cards & Carousels/ArtistCarousel.jsx";
 import { MusicContext } from "../components/MusicProvider.jsx";
+import useLikedSongs from "../hooks/useLikedSongs.js";
 import notFound from "../assets/Image-not-found.png";
+import PrimaryButton from "../components/PrimaryButton.jsx";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -21,14 +23,16 @@ export default function Home() {
   const [showConfig, setShowConfig] = useState(false);
   const [sliderValue, setSliderValue] = useState(() => {
     const saved = localStorage.getItem("slider_value");
-    return saved !== null ? Number(saved) : 3;
+    return saved !== null ? Number(saved) : 40;
   });
+
   const handleChangeInput = (value) => {
     setSliderValue(value);
-    //slaat de stand op waar die op zat
     localStorage.setItem("slider_value", value.toString());
   };
+
   const { tracks, artists, loading } = useRecommendations(sliderValue);
+  const { isLiked, toggleLike } = useLikedSongs();
 
   const toggleConfig = () => setShowConfig((prev) => !prev);
 
@@ -68,12 +72,13 @@ export default function Home() {
         )}
 
         {!showConfig && (
-          <button
-            onClick={toggleConfig}
-            className={`fixed ${currentTrack ? "bottom-36" : "bottom-20"} right-4 z-[1100] flex h-14 w-14 items-center justify-center rounded-full bg-primary shadow-lg shadow-primary/40 transition-all duration-300 hover:bg-primary-hover hover:shadow-xl hover:shadow-primary/50 active:scale-95 cursor-pointer`}
-          >
-            <MdEdit className="text-text-primary text-2xl" />
-          </button>
+          <div className="fixed bottom-44 left-1/2 -translate-x-1/2 w-full max-w-107.5 pointer-events-none z-[1100]">
+            <div className="absolute right-4 pointer-events-auto transition-all duration-300 ease-in-out">
+              <PrimaryButton onClick={toggleConfig}>
+                <MdEdit className="text-text-primary text-3xl" />
+              </PrimaryButton>
+            </div>
+          </div>
         )}
 
         <div
@@ -98,7 +103,13 @@ export default function Home() {
         <p className="px-4 text-text-primary/70">Loading recommendations...</p>
       ) : (
         <>
-          <SongCarousel title="Songs you might like" cards={tracks} />
+          <SongCarousel
+            title="Songs you might like"
+            cards={tracks}
+            isLiked={isLiked}
+            onToggleLike={toggleLike}
+          />
+
           <ArtistCarousel title="Artists you might like" artists={artists} />
         </>
       )}
