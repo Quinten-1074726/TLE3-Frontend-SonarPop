@@ -149,6 +149,7 @@ function Profile() {
 
           <button
             type="button"
+            onClick={() => navigate("/policy")}
             className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm font-bold text-text-primary hover:bg-secondary-hover hover:text-text-inverse focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-background"
           >
             <FiShield aria-hidden="true" />

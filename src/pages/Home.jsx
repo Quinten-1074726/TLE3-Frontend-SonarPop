@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MdClose, MdEdit } from "react-icons/md";
 
 import Search from "../components/Search";
-import PrimaryButton from "../components/PrimaryButton.jsx";
 import Slider from "../components/Slider.jsx";
 import { useNav } from "../components/ui/NavContext.jsx";
 import PageHeader from "../components/ui/PageHeader.jsx";
@@ -12,10 +11,14 @@ import SongCarousel from "../components/Cards & Carousels/SongCarousel.jsx";
 import RandomSongCard from "../components/RandomSongCard.jsx";
 import useRecommendations from "../components/hooks/useRecommendations.js";
 import ArtistCarousel from "../components/Cards & Carousels/ArtistCarousel.jsx";
+import { MusicContext } from "../components/MusicProvider.jsx";
 import useLikedSongs from "../hooks/useLikedSongs.js";
+import notFound from "../assets/Image-not-found.png";
+import PrimaryButton from "../components/PrimaryButton.jsx";
 
 export default function Home() {
   const navigate = useNavigate();
+  const { playTrack, currentTrack } = useContext(MusicContext);
   const { isSearchOpen } = useNav();
   const [showConfig, setShowConfig] = useState(false);
   const [sliderValue, setSliderValue] = useState(() => {
@@ -33,6 +36,22 @@ export default function Home() {
 
   const toggleConfig = () => setShowConfig((prev) => !prev);
 
+  const handlePlayRandom = () => {
+    if (!tracks || tracks.length === 0) return;
+    const card = tracks[Math.floor(Math.random() * tracks.length)];
+    const previewUrl = card.previewUrl || card.preview_url || card.src;
+    if (!previewUrl || previewUrl === "No preview available") return;
+    const trackToPlay = {
+      id: card.id || Math.random(),
+      title: card.name || card.title || "Unknown song",
+      author: card.artist || card.artistName || "Unknown artist",
+      cover: card.imageUrl || notFound,
+      src: previewUrl,
+      album: card.album || { title: "album" },
+    };
+    playTrack(trackToPlay, [trackToPlay]);
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -49,11 +68,7 @@ export default function Home() {
         {isSearchOpen ? (
           <Search onSearch={(q) => console.log("search:", q)} />
         ) : (
-          <RandomSongCard
-            title="Random Song"
-            onShuffle={() => console.log("shuffle random song")}
-            onPlay={() => console.log("play random song")}
-          />
+          <RandomSongCard title="Random Song" onPlay={handlePlayRandom} />
         )}
 
         {!showConfig && (

@@ -49,7 +49,7 @@ function Search({ onSearch, placeholder = "Search..." }) {
   };
 
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full max-w-md relative">
       <form
         onSubmit={handleSubmit}
         className="
@@ -63,10 +63,15 @@ function Search({ onSearch, placeholder = "Search..." }) {
           focus-within:shadow-[0_0_18px_rgba(74,135,222,0.35)]
         "
       >
-        <HiOutlineMagnifyingGlass size={22} className="text-text-primary mr-4" />
+        <HiOutlineMagnifyingGlass
+          size={22}
+          className="text-text-primary mr-4"
+        />
 
         <input
-          type="text"
+          type="search"
+          inputMode="search"
+          autoFocus
           value={query}
           placeholder={placeholder}
           onChange={(e) => {
@@ -86,9 +91,10 @@ function Search({ onSearch, placeholder = "Search..." }) {
       {isOpen && query.trim().length > 0 && (
         <div
           className="
+            absolute w-full z-10
             mt-2 overflow-hidden rounded-lg
             border border-white/10
-            bg-[#0D2132]/60 backdrop-blur-sm
+            bg-[#0D2132]/95 backdrop-blur-sm
           "
         >
           {results.length === 0 ? (
@@ -110,8 +116,12 @@ function Search({ onSearch, placeholder = "Search..." }) {
                     "
                   >
                     <div className="min-w-0">
-                      <div className="text-text-primary truncate">{item.title}</div>
-                      <div className="text-xs text-white/50 truncate">{item.meta}</div>
+                      <div className="text-text-primary truncate">
+                        {item.title}
+                      </div>
+                      <div className="text-xs text-white/50 truncate">
+                        {item.meta}
+                      </div>
                     </div>
 
                     <span className="text-xs text-white/60 shrink-0">

@@ -23,3 +23,20 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Claude project (runtime data)
+.project/sessions/
+.project/features/
+
+# Claude local config (per-device, not shared)
+.claude/paths.local.yaml
+
+# Symlinks/junctions (tracked via master repo, not this one)
+.claude/agents/
+.claude/hooks/
+.claude/skills/
+.claude/scripts/
+
+# Inspect overlay (synced from claude-config)
+inspect-overlay-client.js
+inspect-overlay.vite.ts

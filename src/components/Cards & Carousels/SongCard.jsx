@@ -14,22 +14,34 @@ function SongCard({ card, playlist = [], isLiked = false, onToggleLike }) {
   const cardId = card?.id || card?._id;
   const isCurrent = currentTrack?.id === cardId;
 
+  const normalizeTrack = (c) => ({
+    id: c.id || c._id || Math.random(),
+    title: c.name || c.title || "Unknown song",
+    author: c.artist || c.artistName || "Unknown artist",
+    cover: c.imageUrl || c.image || notFound,
+    src: c.previewUrl || c.preview_url || c.src,
+    album: c.album || { title: "album" },
+  });
+
   const handlePlay = () => {
     if (!previewUrl || previewUrl === "No preview available") {
       console.warn("Geen preview url beschikbaar voor dit nummer");
       return;
     }
 
-    const trackToPlay = {
-      id: cardId || Math.random(),
-      title: songName,
-      author: artistName,
-      cover: image,
-      src: previewUrl,
-      album: card?.album || { title: "album" },
-    };
+    const trackToPlay = normalizeTrack(card);
 
-    playTrack(trackToPlay, playlist.length > 0 ? playlist : [trackToPlay]);
+    if (playlist.length > 0) {
+      const normalizedPlaylist = playlist
+        .map(normalizeTrack)
+        .filter((t) => t.src && t.src !== "No preview available");
+      playTrack(
+        trackToPlay,
+        normalizedPlaylist.length > 0 ? normalizedPlaylist : [trackToPlay],
+      );
+    } else {
+      playTrack(trackToPlay, [trackToPlay]);
+    }
   };
 
   const handleLikeClick = async (e) => {
