@@ -48,6 +48,7 @@ function useRecommendations(sliderValue) {
 
                 const data = await recRes.json();
 
+
                 const mappedTracks = data.tracks.map(({track}) => ({
                     id: track._id,
                     title: track.title,
@@ -60,7 +61,7 @@ function useRecommendations(sliderValue) {
 
 
                 setTracks(mappedTracks);
-
+console.log(mappedTracks)
                 // Getting artists from similarArtists
                 const uniqueArtists = {};
                 mappedTracks.forEach(track => {

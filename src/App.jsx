@@ -25,6 +25,8 @@ import DashboardLayout from "./components/ui/DashboardLayout.jsx";
 
 import ProtectedRoute from "./auth/ProtectedRoute.jsx";
 import RoleRoute from "./auth/RoleRoute.jsx";
+import Friends from "./pages/Friends.jsx";
+import MusicProvider from "./components/MusicProvider.jsx";
 import HomeRedirect from "./auth/HomeRedirect.jsx";
 
 const router = createBrowserRouter([
@@ -77,6 +79,10 @@ const router = createBrowserRouter([
             path: "/profile",
             element: <Profile />,
           },
+            {
+                path: "/profile/friends",
+                element: <Friends />,
+            },
           {
             path: "/policy",
             element: <Policy />,
@@ -126,5 +132,9 @@ const router = createBrowserRouter([
 ]);
 
 export default function App() {
-  return <RouterProvider router={router} />;
+    return <MusicProvider>
+       <RouterProvider router={router}/>
+    </MusicProvider>
+
+
 }
