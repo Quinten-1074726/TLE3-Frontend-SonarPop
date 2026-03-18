@@ -44,10 +44,9 @@ function useRecommendations(sliderValue) {
                     }),
                 });
 
-                console.log(sliderValue)
 
                 const data = await recRes.json();
-                console.log(data)
+
 
                 const mappedTracks = data.tracks.map(({ track }) => ({
                     id: track._id,
@@ -55,10 +54,11 @@ function useRecommendations(sliderValue) {
                     artist: track.artist,
                     imageUrl: track.imageUrl || track.albumImages?.[0]?.url,
                     similarArtists: track.similarArtists || [],
+                    previewUrl: track.previewUrl
                 }));
 
                 setTracks(mappedTracks);
-
+console.log(mappedTracks)
                 // Getting artists from similarArtists
                 const uniqueArtists = {};
                 mappedTracks.forEach(track => {
