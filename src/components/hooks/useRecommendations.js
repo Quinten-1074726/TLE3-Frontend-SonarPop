@@ -1,5 +1,5 @@
 // THIS FILE IS FOR THE HOME PAGE - CURRENTLY LOADS RECOMMENDED SONGS & ARTISTS
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import notFound from "../../assets/Image-not-found.png";
 
 function useRecommendations(sliderValue) {
@@ -12,6 +12,7 @@ function useRecommendations(sliderValue) {
 
     useEffect(() => {
         let isMounted = true
+
         async function loadRecommendations() {
             setLoading(true)
             try {
@@ -30,7 +31,7 @@ function useRecommendations(sliderValue) {
                     body: JSON.stringify({}),
                 });
 
-                const { vector } = await profileRes.json();
+                const {vector} = await profileRes.json();
 
 
                 // Get song recommendations and use sliderValue to change the dial
@@ -48,7 +49,7 @@ function useRecommendations(sliderValue) {
                 const data = await recRes.json();
 
 
-                const mappedTracks = data.tracks.map(({ track }) => ({
+                const mappedTracks = data.tracks.map(({track}) => ({
                     id: track._id,
                     title: track.title,
                     artist: track.artist,
@@ -56,6 +57,8 @@ function useRecommendations(sliderValue) {
                     similarArtists: track.similarArtists || [],
                     previewUrl: track.previewUrl
                 }));
+
+
 
                 setTracks(mappedTracks);
 console.log(mappedTracks)
@@ -85,18 +88,18 @@ console.log(mappedTracks)
                 setLoading(false);
             }
         }
-        
+
         const handler = setTimeout(() => {
             loadRecommendations()
         }, 400)
-        
+
         return () => {
             isMounted = false
             clearTimeout(handler)
         }
     }, [API_KEY, BASE_URL, sliderValue]);
 
-    return { tracks, artists, loading };
+    return {tracks, artists, loading};
 }
 
 export default useRecommendations;

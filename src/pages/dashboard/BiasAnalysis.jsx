@@ -79,7 +79,7 @@ function getLearningLabel(value) {
   return "Low";
 }
 
-export default function DashboardHome() {
+export default function BiasAnalysis() {
   const role = getUserRole();
 
   const [loading, setLoading] = useState(true);
@@ -147,7 +147,7 @@ export default function DashboardHome() {
       } catch (err) {
         if (!active) return;
         setConfigAvailable(false);
-        setError(err.message || "Overview kon niet geladen worden.");
+        setError(err.message || "Bias analysis kon niet geladen worden.");
       } finally {
         if (active) setLoading(false);
       }
@@ -200,7 +200,7 @@ export default function DashboardHome() {
   if (loading) {
     return (
       <div className="rounded-2xl border border-white/10 bg-[#181919] p-5 text-text-primary">
-        Overview laden...
+        Bias analysis laden...
       </div>
     );
   }
@@ -211,10 +211,8 @@ export default function DashboardHome() {
         <p className="text-xs uppercase tracking-[0.2em] text-white/45">
           SonarPoppy {role} dashboard
         </p>
-        <h1 className="mt-2 text-4xl font-bold">Overview</h1>
-        <p className="mt-3 text-sm text-white/60">
-          Current model and recommendation balance
-        </p>
+        <h1 className="mt-2 text-4xl font-bold">Bias & Analysis</h1>
+        <p className="mt-3 text-sm text-white/60">Current model behavior</p>
       </header>
 
       {error ? (
@@ -241,12 +239,12 @@ export default function DashboardHome() {
           subtitle="Behavior-driven weight"
         />
         <StatCard
-          title="Discovery level"
+          title="Discovery"
           value={configAvailable ? discoveryLabel : "—"}
           subtitle="Based on library boost"
         />
         <StatCard
-          title="Learning level"
+          title="Learning"
           value={configAvailable ? learningLabel : "—"}
           subtitle="Profile adaptation signal"
         />
@@ -291,7 +289,7 @@ export default function DashboardHome() {
           )}
         </Panel>
 
-        <Panel title="Current signals">
+        <Panel title="Signals">
           <div className="space-y-3">
             <MiniSignal label="Mix focus" value={configAvailable ? mixLabel : "—"} />
             <MiniSignal
@@ -303,7 +301,7 @@ export default function DashboardHome() {
               value={configAvailable ? `${settings.cfArtistWeight}` : "—"}
             />
             <MiniSignal
-              label="Profile learning"
+              label="Profile signal"
               value={configAvailable ? learningLabel : "—"}
             />
           </div>
