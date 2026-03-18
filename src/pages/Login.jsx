@@ -32,9 +32,12 @@ function Login() {
                 return;
             }
 
-            storeSession(data.token, data.user || { username });
+            const user = data.user || { username };
+            storeSession(data.token, user);
 
-            if (data.user && !data.user.hasCompletedOnboarding) {
+            if (user.role === "admin" || user.role === "curator") {
+                navigate("/dashboard");
+            } else if (!user.hasCompletedOnboarding) {
                 navigate("/onboarding");
             } else {
                 navigate("/");
