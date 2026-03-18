@@ -7,12 +7,12 @@ import PrimaryButton from "../components/PrimaryButton.jsx";
 import Slider from "../components/Slider.jsx";
 import {useNav} from "../components/ui/NavContext.jsx";
 import PageHeader from "../components/ui/PageHeader.jsx";
-import MusicPlayer from "../components/MusicPlayer.jsx";
+
 import SongCarousel from "../components/Cards & Carousels/SongCarousel.jsx";
-import GenreCarousel from "../components/Cards & Carousels/GenreCarousel.jsx";
 import RandomSongCard from "../components/RandomSongCard.jsx";
 import useRecommendations from "../components/hooks/useRecommendations.js";
 import ArtistCarousel from "../components/Cards & Carousels/ArtistCarousel.jsx";
+
 
 export default function Home() {
     const navigate = useNavigate();
@@ -41,6 +41,7 @@ export default function Home() {
     }, [navigate]);
 
     return (
+
         <div className="space-y-6 min-h-screen bg-background text-text-primary pb-28">
             <PageHeader title={isSearchOpen ? "Search" : "Home"}/>
 
@@ -92,7 +93,6 @@ export default function Home() {
                     <ArtistCarousel title="Artists you might like" artists={artists}/>
                 </>
             )}
-            <MusicPlayer/>
         </div>
     );
 }

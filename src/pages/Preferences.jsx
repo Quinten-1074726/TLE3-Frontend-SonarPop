@@ -11,6 +11,8 @@ function Preferences() {
     const [lists, setLists] = useState({ genres: [], artists: [], songs: [] });
     const [activeTab, setActiveTab] = useState("genres");
     const [viewAll, setViewAll] = useState(false); // toggle voor top 5 / all
+    const [query, setQuery] = useState("");
+    const [results, setResults] = useState([]);
 
     const tabs = [
         { key: "genres", label: "Genres" },
@@ -107,6 +109,94 @@ function Preferences() {
         .sort((a, b) => b[1] - a[1]); // hoge waarde eerst
     const displayedSliders = viewAll ? sortedSliders : sortedSliders.slice(0, 5);
 
+    const searchItems = async (value) => {
+        setQuery(value);
+
+        if (value.length < 2) {
+            setResults([]);
+            return;
+        }
+
+        const token = localStorage.getItem("token");
+
+        try {
+            const [artistsRes, tracksRes] = await Promise.all([
+                fetch(`${BASE_URL}/artists/search?q=${value}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "X-API-Key": API_KEY
+                    }
+                }),
+                fetch(`${BASE_URL}/tracks/search?q=${value}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "X-API-Key": API_KEY
+                    }
+                })
+            ]);
+
+            const artists = artistsRes.ok ? await artistsRes.json() : { results: [] };
+            const tracks = tracksRes.ok ? await tracksRes.json() : { results: [] };
+
+            const formatted = [
+                ...artists.results.map(a => ({
+                    type: "artist",
+                    value: a.name,
+                    label: a.name
+                })),
+                ...tracks.results.map(t => ({
+                    type: "track",
+                    value: t._id,
+                    label: `${t.title} - ${t.artist}`
+                }))
+            ].slice(0, 5);
+
+            setResults(formatted);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const addBlacklistItem = async (item) => {
+        if (!item.value || !item.type) {
+            console.error("Missing value or type");
+            return;
+        }
+
+        const token = localStorage.getItem("token");
+
+        try {
+            const response = await fetch(`${BASE_URL}/blacklist`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                    "X-API-Key": API_KEY
+                },
+                body: JSON.stringify({
+                    type: item.type,
+                    value: item.value
+                })
+            });
+
+            const data = await response.json();
+            console.log("Blacklist POST response:", data.entries);
+
+            if (!response.ok) throw new Error("Failed to add");
+
+            setLists({
+                genres: data.entries.filter(e => e.type === "genre"),
+                artists: data.entries.filter(e => e.type === "artist"),
+                songs: data.entries.filter(e => e.type === "track"),
+            });
+
+            setResults([]);
+            setQuery("");
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     return (
         <>
             <PageHeader title="Preferences" />
@@ -165,18 +255,38 @@ function Preferences() {
                 </div>
             </section>
 
-            {/* --- Blacklist section blijft hetzelfde --- */}
             <section className="m-4">
                 <div className="flex w-full items-center gap-4">
-                    <div className="basis-2/3">
-                        <p className="text-xl text-text-primary font-bold mb-2">Blacklist</p>
-                        <p className="font-semibold text-text-primary text-xs">
+                    <div className="w-full">
+                        <p className="text-2xl text-text-primary font-bold mb-2">Blacklist</p>
+                        <p className="font-semibold text-text-primary text-sm">
                             Excluded from recommendations
                         </p>
                     </div>
-                    <div className="basis-1/3">
-                        <PrimaryButton>View all</PrimaryButton>
-                    </div>
+                </div>
+
+                <div className="mx-6 my-4 relative">
+                    <input
+                        type="text"
+                        value={query}
+                        onChange={(e) => searchItems(e.target.value)}
+                        placeholder="Search..."
+                        className="w-full p-2 rounded bg-secondary text-text-primary"
+                    />
+
+                    {results.length > 0 && (
+                        <ul className="absolute w-full bg-tertiary rounded shadow mt-1 z-10">
+                            {results.map((item, i) => (
+                                <li
+                                    key={i}
+                                    onClick={() => addBlacklistItem(item)}
+                                    className="p-2 hover:bg-secondary cursor-pointer text-text-primary"
+                                >
+                                    {item.label}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
 
                 <div className="flex gap-2 mb-4 justify-center my-6">
@@ -222,42 +332,6 @@ function Preferences() {
                                         </button>
                                     </li>
                                 ))}
-                                <button
-                                    onClick={async () => {
-                                        const value = prompt("Add item");
-                                        if (!value) return;
-
-                                        const newItem = {
-                                            type: activeTab === "songs" ? "track" : activeTab.slice(0, -1),
-                                            value: value
-                                        };
-
-                                        try {
-                                            const response = await fetch(`${BASE_URL}/blacklist`, {
-                                                method: "POST",
-                                                headers: {
-                                                    "Content-Type": "application/json",
-                                                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                                                    "X-API-Key": API_KEY
-                                                },
-                                                body: JSON.stringify(newItem)
-                                            });
-                                            const data = await response.json();
-                                            if (!response.ok) throw new Error("Failed to add");
-
-                                            setLists({
-                                                genres: data.entries.filter(e => e.type === "genre"),
-                                                artists: data.entries.filter(e => e.type === "artist"),
-                                                songs: data.entries.filter(e => e.type === "track")
-                                            });
-                                        } catch (err) {
-                                            console.error("Error adding item", err);
-                                        }
-                                    }}
-                                    className="absolute bottom-4 right-4 px-4 py-2 bg-text-primary text-text-inverse rounded-lg text-2xl shadow-lg"
-                                >
-                                    +
-                                </button>
                             </ul>
                         ))}
                     </div>
