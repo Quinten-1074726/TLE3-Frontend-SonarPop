@@ -113,3 +113,17 @@
 .scrollbar-soft::-webkit-scrollbar-thumb:hover {
   background: rgba(132, 186, 233, 1);
 }
+
+body[data-app-view="dashboard"] {
+  display: block;
+  background: #111315;
+}
+
+body[data-app-view="dashboard"] #root {
+  max-width: none;
+  width: 100%;
+  border-left: none;
+  border-right: none;
+  box-shadow: none;
+  background: #111315;
+}

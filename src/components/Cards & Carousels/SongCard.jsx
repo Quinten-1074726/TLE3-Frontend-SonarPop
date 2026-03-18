@@ -1,7 +1,7 @@
 import notFound from "../../assets/Image-not-found.png";
 
 function SongCard({ card }) {
-    const image = card?.image || card?.cover || card?.avatar || notFound;
+    const image = card?.imageUrl || notFound;
     const songName = card?.name || card?.title || "Unknown song";
     const artistName = card?.artist || card?.artistName || "Unknown artist";
 

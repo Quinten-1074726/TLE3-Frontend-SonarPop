@@ -1,5 +1,6 @@
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
+import { storeSession } from "../auth/AuthStorage";
 
 function Login() {
     const [username, setUsername] = useState("");
@@ -31,15 +32,16 @@ function Login() {
                 return;
             }
 
-            localStorage.setItem("token", data.token);
+            const user = data.user || { username };
+            storeSession(data.token, user);
 
-            if (data.user) {
-                localStorage.setItem("user", JSON.stringify(data.user));
+            if (user.role === "admin" || user.role === "curator") {
+                navigate("/dashboard");
+            } else if (!user.hasCompletedOnboarding) {
+                navigate("/onboarding");
             } else {
-                localStorage.setItem("user", JSON.stringify({ username }));
+                navigate("/");
             }
-
-            navigate("/");
         } catch (err) {
             console.error(err);
             setError("Unable to connect to the server.");
