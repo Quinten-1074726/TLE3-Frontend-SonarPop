@@ -1,12 +1,7 @@
 import { HiOutlinePlay } from "react-icons/hi2";
-import { MdShuffle } from "react-icons/md";
 import { TbDice5 } from "react-icons/tb";
 
-export default function RandomSongCard({
-  title = "Random Song",
-  onPlay,
-  onShuffle,
-}) {
+export default function RandomSongCard({ title = "Random Song", onPlay }) {
   return (
     <div className="w-full max-w-md">
       <div
@@ -24,25 +19,14 @@ export default function RandomSongCard({
           </span>
         </div>
 
-        <div className="flex items-center gap-4 text-text-primary">
-          <button
-            type="button"
-            aria-label="Shuffle random song"
-            onClick={onShuffle}
-            className="transition hover:scale-110"
-          >
-            <MdShuffle className="text-2xl" />
-          </button>
-
-          <button
-            type="button"
-            aria-label="Play random song"
-            onClick={onPlay}
-            className="transition hover:scale-110"
-          >
-            <HiOutlinePlay className="text-3xl" />
-          </button>
-        </div>
+        <button
+          type="button"
+          aria-label="Play random song"
+          onClick={onPlay}
+          className="text-text-primary transition hover:scale-110"
+        >
+          <HiOutlinePlay className="text-3xl" />
+        </button>
       </div>
     </div>
   );

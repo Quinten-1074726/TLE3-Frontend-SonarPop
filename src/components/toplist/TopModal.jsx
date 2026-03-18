@@ -4,9 +4,8 @@ import DonutChart from "../charts/DonutChart";
 
 const TITLE_BY_TYPE = {
   artist: "Top Artists",
-  album: "Top Albums",
-  song: "Top Songs",
   genre: "Top Genres",
+  liked: "Top Songs",
 };
 
 function TopModal({
@@ -20,7 +19,9 @@ function TopModal({
   const heading = title || TITLE_BY_TYPE[type] || "Top 10";
 
   const chartLabels = items.slice(0, 5).map((item) => item.name);
-  const chartValues = items.slice(0, 5).map((item) => item.chartValue ?? item.valueNumber ?? 0);
+  const chartValues = items
+    .slice(0, 5)
+    .map((item) => item.chartValue ?? item.valueNumber ?? 0);
 
   return (
     <div className="absolute inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
@@ -35,9 +36,7 @@ function TopModal({
         "
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-          <h2 className="text-text-primary text-lg font-semibold">
-            {heading}
-          </h2>
+          <h2 className="text-text-primary text-lg font-semibold">{heading}</h2>
 
           <button
             type="button"
@@ -55,9 +54,7 @@ function TopModal({
 
         <div className="px-3 py-3 max-h-[75vh] overflow-y-auto">
           {isLoading && (
-            <div className="py-8 text-center text-white/60">
-              Loading...
-            </div>
+            <div className="py-8 text-center text-white/60">Loading...</div>
           )}
 
           {!isLoading && items.length === 0 && (
