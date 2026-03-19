@@ -35,3 +35,5 @@ src/
 
 * **index.css**
   Bevat de Tailwind import en globale styling.
+
+  deze moet nog anders
