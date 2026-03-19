@@ -61,7 +61,7 @@ export default function Home() {
   }, [navigate]);
 
   return (
-    <div className="space-y-6 min-h-screen bg-background text-text-primary pb-28">
+    <main className="space-y-6 min-h-screen bg-background text-text-primary pb-28">
       <PageHeader title={isSearchOpen ? "Search" : "Home"} />
 
       <div className="px-6 space-y-6">
@@ -72,10 +72,10 @@ export default function Home() {
         )}
 
         {!showConfig && (
-          <div className="fixed bottom-44 left-1/2 -translate-x-1/2 w-full max-w-107.5 pointer-events-none z-[1100]">
+          <div className="fixed bottom-44 left-1/2 -translate-x-1/2 w-full max-w-107.5 pointer-events-none z-1100">
             <div className="absolute right-4 pointer-events-auto transition-all duration-300 ease-in-out">
-              <PrimaryButton onClick={toggleConfig}>
-                <MdEdit className="text-text-primary text-3xl" />
+              <PrimaryButton onClick={toggleConfig} aria-label="Open recommendations configuration" aria-expanded={showConfig}>
+                <MdEdit className="text-text-primary text-3xl" aria-hidden="true" />
               </PrimaryButton>
             </div>
           </div>
@@ -87,12 +87,16 @@ export default function Home() {
               ? "opacity-100 translate-y-0 scale-100"
               : "opacity-0 translate-y-10 scale-95 pointer-events-none"
           }`}
+          role="dialog"
+          aria-label="Recommendations configuration"
+          aria-hidden={!showConfig}
         >
           <button
             onClick={toggleConfig}
             className="absolute top-8 right-8 text-2xl text-text-primary transition-transform duration-200 hover:rotate-90"
+            aria-label="Close configuration"
           >
-            <MdClose />
+            <MdClose aria-hidden="true" />
           </button>
 
           <Slider value={sliderValue} onChange={handleChangeInput} />
@@ -100,7 +104,7 @@ export default function Home() {
       </div>
 
       {loading ? (
-        <p className="px-4 text-text-primary/70">Loading recommendations...</p>
+        <p className="px-4 text-text-primary/70" role="status" aria-live="polite">Loading recommendations...</p>
       ) : (
         <>
           <SongCarousel
@@ -113,6 +117,6 @@ export default function Home() {
           <ArtistCarousel title="Artists you might like" artists={artists} />
         </>
       )}
-    </div>
+    </main>
   );
 }
